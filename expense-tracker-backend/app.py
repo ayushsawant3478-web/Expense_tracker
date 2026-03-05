@@ -1,0 +1,43 @@
+import os
+from flask import Flask
+from flask_cors import CORS
+from flask_jwt_extended import JWTManager
+from flask_bcrypt import Bcrypt
+from dotenv import load_dotenv
+
+from routes.auth_routes import auth_bp
+from routes.expense_routes import expense_bp
+from routes.income_routes import income_bp
+from routes.budget_routes import budget_bp
+
+from models.user import create_users_table
+from models.expense import create_expenses_table
+from models.income import create_income_table
+from models.budget import create_budgets_table
+
+from config import Config
+
+load_dotenv()
+
+app = Flask(__name__)
+app.config.from_object(Config)
+app.config["JWT_SECRET_KEY"] = os.getenv("JWT_SECRET_KEY")
+
+jwt = JWTManager(app)
+bcrypt = Bcrypt(app)
+CORS(app, origins=["http://localhost:3000", "http://127.0.0.1:3000"])
+
+app.register_blueprint(auth_bp)
+app.register_blueprint(expense_bp)
+app.register_blueprint(income_bp)
+app.register_blueprint(budget_bp)
+
+with app.app_context():
+    create_users_table()
+    create_expenses_table()
+    create_income_table()
+    create_budgets_table()
+    print("All tables ready!")
+
+if __name__ == "__main__":
+    app.run(debug=True, port=8000)

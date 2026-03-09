@@ -2,6 +2,7 @@ import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { ExpenseProvider } from './context/ExpenseContext';
+import { GoalProvider } from './context/GoalContext';
 import LandingPage from './pages/LandingPage';
 import LoginPage from './pages/LoginPage';
 import RegisterPage from './pages/RegisterPage';
@@ -36,9 +37,11 @@ export default function App() {
   return (
     <AuthProvider>
       <ExpenseProvider>
-        <Router>
-          <AppContent />
-        </Router>
+        <GoalProvider>
+          <Router>
+            <AppContent />
+          </Router>
+        </GoalProvider>
       </ExpenseProvider>
     </AuthProvider>
   );

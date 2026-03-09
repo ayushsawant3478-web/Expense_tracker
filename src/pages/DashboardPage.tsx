@@ -9,6 +9,8 @@ import IncomeForm from '../components/IncomeForm';
 import ChartComponent from '../components/ChartComponent';
 import Navbar from '../components/Navbar';
 import { FINANCIAL_TIPS } from '../constants';
+import LiveMarketData from '../components/LiveMarketData';
+import GoalTracker from '../components/GoalTracker';
 
 export default function DashboardPage() {
   const { user, isDemo } = useAuth();
@@ -85,6 +87,87 @@ export default function DashboardPage() {
     }
     return suggestions;
   };
+  const getInvestmentPlan = (s: number) => {
+    if (s <= 0) {
+      return {
+        name: "No Savings",
+        range: "₹0 or Negative",
+        theme: { text: "text-rose-400", bg: "bg-rose-500/10", border: "border-rose-500/20" },
+        suggestions: [
+          { title: "Cut Expenses", desc: "Reduce discretionary spends and renegotiate bills to lower recurring costs." },
+          { title: "Track Spending", desc: "Use category tracking to spot leaks and set weekly caps." },
+          { title: "Start Emergency Fund", desc: "Park small amounts regularly to build a 1-month buffer." }
+        ]
+      };
+    }
+    if (s > 0 && s <= 2000) {
+      return {
+        name: "Starter",
+        range: "₹1 - ₹2,000",
+        theme: { text: "text-amber-400", bg: "bg-amber-500/10", border: "border-amber-500/20" },
+        suggestions: [
+          { title: "Digital Gold", desc: "Begin with tiny ticket sizes to build a habit." },
+          { title: "Recurring Deposit", desc: "Automate a monthly RD with a fixed term." },
+          { title: "Round-up Apps", desc: "Use round-up savings to capture spare change." }
+        ]
+      };
+    }
+    if (s > 2000 && s <= 5000) {
+      return {
+        name: "Growing",
+        range: "₹2,000 - ₹5,000",
+        theme: { text: "text-amber-400", bg: "bg-amber-500/10", border: "border-amber-500/20" },
+        suggestions: [
+          { title: "Mutual Fund SIP", desc: "Start diversified equity or hybrid SIPs." },
+          { title: "Liquid Funds", desc: "Keep short-term surplus accessible and low-risk." },
+          { title: "Open PPF", desc: "Lock long-term savings with tax benefits." }
+        ]
+      };
+    }
+    if (s > 5000 && s <= 10000) {
+      return {
+        name: "Moderate",
+        range: "₹5,000 - ₹10,000",
+        theme: { text: "text-emerald-400", bg: "bg-emerald-500/10", border: "border-emerald-500/20" },
+        suggestions: [
+          { title: "Index Funds", desc: "Allocate core exposure to broad market indices." },
+          { title: "US ETFs", desc: "Add international diversification within limits." },
+          { title: "Fixed Deposits", desc: "Stabilize portion with assured returns." }
+        ]
+      };
+    }
+    if (s > 10000 && s <= 25000) {
+      return {
+        name: "Strong",
+        range: "₹10,000 - ₹25,000",
+        theme: { text: "text-emerald-400", bg: "bg-emerald-500/10", border: "border-emerald-500/20" },
+        suggestions: [
+          { title: "Diversified Portfolio", desc: "Balance equity, debt, and international exposure." },
+          { title: "Blue Chip Stocks", desc: "Add quality large-caps for stability." },
+          { title: "NPS Pension", desc: "Contribute for long-term retirement corpus and tax." }
+        ]
+      };
+    }
+    return {
+      name: "Excellent",
+      range: "Above ₹25,000",
+      theme: { text: "text-emerald-400", bg: "bg-emerald-500/10", border: "border-emerald-500/20" },
+      suggestions: [
+        { title: "REITs", desc: "Gain real estate exposure via yield-focused trusts." },
+        { title: "Emergency Fund 6m", desc: "Scale buffer to six months of expenses." },
+        { title: "ELSS Funds", desc: "Use tax-saving equity funds for Section 80C." }
+      ]
+    };
+  };
+  const investmentTier = useMemo(() => getInvestmentPlan(netBalance), [netBalance]);
+  const savingsTier: 'none' | 'starter' | 'growing' | 'moderate' | 'good' | 'excellent' = useMemo(() => {
+    if (netBalance <= 0) return 'none';
+    if (netBalance < 2000) return 'starter';
+    if (netBalance < 5000) return 'growing';
+    if (netBalance < 10000) return 'moderate';
+    if (netBalance < 25000) return 'good';
+    return 'excellent';
+  }, [netBalance]);
 
   if (!user) return null;
 
@@ -222,6 +305,54 @@ export default function DashboardPage() {
             ))}
           </div>
         </motion.section>
+
+        <motion.section
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.7 }}
+          className="mb-12"
+        >
+          <div className="flex items-center justify-between mb-6">
+            <h2 className="text-xl font-bold flex items-center gap-2">
+              <TrendingUp className={`${investmentTier.theme.text} w-5 h-5`} />
+              Investment Suggestions
+            </h2>
+            <div className={`px-4 py-2 rounded-full border ${investmentTier.theme.border} ${investmentTier.theme.bg} flex items-center gap-3`}>
+              <span className={`text-sm font-bold ${investmentTier.theme.text}`}>{investmentTier.name}: {investmentTier.range}</span>
+            </div>
+          </div>
+          <div className="glass p-6 rounded-[24px] border-white/5 mb-6">
+            <p className="text-sm font-medium text-slate-400 mb-1">Current Monthly Net Savings</p>
+            <p className={`text-3xl font-mono font-bold ${investmentTier.theme.text}`}>₹{netBalance.toLocaleString('en-IN', { minimumFractionDigits: 2 })}</p>
+          </div>
+          <AnimatePresence mode="wait">
+            <motion.div
+              key={investmentTier.name}
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -10 }}
+              transition={{ duration: 0.25 }}
+              className="grid grid-cols-1 md:grid-cols-3 gap-6"
+            >
+              {investmentTier.suggestions.map((s, i) => (
+                <motion.div
+                  key={s.title}
+                  initial={{ opacity: 0, y: 12 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: i * 0.05 }}
+                  className={`glass p-6 rounded-[24px] border ${investmentTier.theme.border} card-hover ${investmentTier.theme.bg}`}
+                >
+                  <h4 className="font-bold text-sm mb-2">{s.title}</h4>
+                  <p className="text-xs text-slate-400 leading-relaxed">{s.desc}</p>
+                </motion.div>
+              ))}
+            </motion.div>
+          </AnimatePresence>
+        </motion.section>
+
+        <GoalTracker />
+
+        <LiveMarketData savingsTier={savingsTier} />
 
         {/* Budget Alert */}
         <AnimatePresence>

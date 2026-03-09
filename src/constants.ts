@@ -1,4 +1,5 @@
-export const API_URL = "http://127.0.0.1:8000";
+export const API_URL = "http://127.0.0.1:8001";
+export const MARKET_API_URL = "http://127.0.0.1:8001";
 
 export const CATEGORIES = [
   'Food', 'Travel', 'Bills', 'Shopping', 'Entertainment', 'Health', 'Education', 'Other'

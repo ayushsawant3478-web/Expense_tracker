@@ -19,3 +19,12 @@ export interface User {
   username: string;
   email: string;
 }
+
+export interface Goal {
+  id: string;
+  name: string;
+  target_amount: number;
+  saved_amount: number;
+  deadline: string;
+  progress: number;
+}

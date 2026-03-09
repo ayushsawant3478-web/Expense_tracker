@@ -1,6 +1,8 @@
-import { useState, FormEvent } from 'react';
+import { useState, FormEvent, useEffect } from 'react';
 import { useExpense } from '../context/ExpenseContext';
-import { INCOME_SOURCES } from '../constants';
+import { INCOME_SOURCES, API_URL } from '../constants';
+import { motion } from 'motion/react';
+import { RefreshCw } from 'lucide-react';
 
 export default function IncomeForm() {
   const [description, setDescription] = useState('');
@@ -8,6 +10,39 @@ export default function IncomeForm() {
   const [source, setSource] = useState(INCOME_SOURCES[0]);
   const [date, setDate] = useState(new Date().toISOString().split('T')[0]);
   const { addTransaction } = useExpense();
+  const [autoDetected, setAutoDetected] = useState(false);
+  const [detecting, setDetecting] = useState(false);
+  const [descTimer, setDescTimer] = useState<number | undefined>(undefined);
+
+  useEffect(() => {
+    if (descTimer) {
+      clearTimeout(descTimer);
+    }
+    if (description.trim().length < 3) {
+      setAutoDetected(false);
+      return;
+    }
+    const t = window.setTimeout(async () => {
+      try {
+        setDetecting(true);
+        const res = await fetch(`${API_URL}/income/categorize`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ description })
+        });
+        if (res.ok) {
+          const data = await res.json();
+          setSource(data.source);
+          setAutoDetected(true);
+        }
+      } catch (_) {
+      } finally {
+        setDetecting(false);
+      }
+    }, 500);
+    setDescTimer(t);
+    return () => clearTimeout(t);
+  }, [description]);
 
   const handleSubmit = (e: FormEvent) => {
     e.preventDefault();
@@ -52,15 +87,29 @@ export default function IncomeForm() {
         </div>
         <div>
           <label className="block text-sm font-medium text-slate-400 mb-1.5 ml-1">Source</label>
-          <select
+          <div className="relative">
+            <select
             value={source}
-            onChange={(e) => setSource(e.target.value)}
+            onChange={(e) => { setSource(e.target.value); setAutoDetected(false); }}
             className="w-full bg-white/5 border border-white/10 rounded-2xl px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-violet-500/50 focus:border-violet-500 transition-all"
           >
             {INCOME_SOURCES.map(src => (
               <option key={src} value={src} className="bg-slate-900">{src}</option>
             ))}
-          </select>
+            </select>
+            {detecting && (
+              <RefreshCw className="w-4 h-4 absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 animate-spin" />
+            )}
+          </div>
+          {autoDetected && (
+            <motion.span
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              className="inline-block mt-2 px-2 py-1 text-[11px] font-bold rounded-full bg-violet-500/10 text-violet-400 border border-violet-500/20"
+            >
+              ✨ Auto
+            </motion.span>
+          )}
         </div>
       </div>
       <div>

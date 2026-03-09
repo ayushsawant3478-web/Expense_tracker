@@ -1,6 +1,8 @@
-import { useState, FormEvent } from 'react';
+import { useState, FormEvent, useEffect } from 'react';
 import { useExpense } from '../context/ExpenseContext';
-import { CATEGORIES } from '../constants';
+import { CATEGORIES, API_URL } from '../constants';
+import { motion } from 'motion/react';
+import { RefreshCw } from 'lucide-react';
 
 export default function ExpenseForm() {
   const [description, setDescription] = useState('');
@@ -8,6 +10,39 @@ export default function ExpenseForm() {
   const [category, setCategory] = useState(CATEGORIES[0]);
   const [date, setDate] = useState(new Date().toISOString().split('T')[0]);
   const { addTransaction } = useExpense();
+  const [autoDetected, setAutoDetected] = useState(false);
+  const [detecting, setDetecting] = useState(false);
+  const [descTimer, setDescTimer] = useState<number | undefined>(undefined);
+
+  useEffect(() => {
+    if (descTimer) {
+      clearTimeout(descTimer);
+    }
+    if (description.trim().length < 3) {
+      setAutoDetected(false);
+      return;
+    }
+    const t = window.setTimeout(async () => {
+      try {
+        setDetecting(true);
+        const res = await fetch(`${API_URL}/expenses/categorize`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ description })
+        });
+        if (res.ok) {
+          const data = await res.json();
+          setCategory(data.category);
+          setAutoDetected(true);
+        }
+      } catch (_) {
+      } finally {
+        setDetecting(false);
+      }
+    }, 500);
+    setDescTimer(t);
+    return () => clearTimeout(t);
+  }, [description]);
 
   const handleSubmit = (e: FormEvent) => {
     e.preventDefault();
@@ -52,15 +87,29 @@ export default function ExpenseForm() {
         </div>
         <div>
           <label className="block text-sm font-medium text-slate-400 mb-1.5 ml-1">Category</label>
-          <select
+          <div className="relative">
+            <select
             value={category}
-            onChange={(e) => setCategory(e.target.value)}
+            onChange={(e) => { setCategory(e.target.value); setAutoDetected(false); }}
             className="w-full bg-white/5 border border-white/10 rounded-2xl px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-violet-500/50 focus:border-violet-500 transition-all"
           >
             {CATEGORIES.map(cat => (
               <option key={cat} value={cat} className="bg-slate-900">{cat}</option>
             ))}
-          </select>
+            </select>
+            {detecting && (
+              <RefreshCw className="w-4 h-4 absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 animate-spin" />
+            )}
+          </div>
+          {autoDetected && (
+            <motion.span
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              className="inline-block mt-2 px-2 py-1 text-[11px] font-bold rounded-full bg-violet-500/10 text-violet-400 border border-violet-500/20"
+            >
+              ✨ Auto
+            </motion.span>
+          )}
         </div>
       </div>
       <div>

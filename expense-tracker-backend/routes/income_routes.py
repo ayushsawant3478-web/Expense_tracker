@@ -1,6 +1,7 @@
 from flask import Blueprint, request, jsonify
 from models.income import add_income, get_income, delete_income
 from flask_jwt_extended import jwt_required, get_jwt_identity
+from utils.categorizer import categorize_income
 
 income_bp = Blueprint('income', __name__)
 
@@ -24,3 +25,10 @@ def get_income_route():
 def delete_income_route(id):
     delete_income(id)
     return jsonify({"message": "Income deleted"}), 200
+
+@income_bp.route('/income/categorize', methods=['POST'])
+def categorize_income_route():
+    data = request.get_json()
+    desc = data.get('description', '')
+    source = categorize_income(desc) if len(desc) >= 1 else "Other"
+    return jsonify({ "source": source }), 200

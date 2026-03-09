@@ -1,6 +1,7 @@
 from flask import Blueprint, request, jsonify
 from models.expense import add_expense, get_expenses, delete_expense
 from flask_jwt_extended import jwt_required, get_jwt_identity
+from utils.categorizer import categorize_expense
 
 expense_bp = Blueprint('expense', __name__)
 
@@ -24,3 +25,10 @@ def get_expenses_route():
 def delete_expense_route(id):
     delete_expense(id)
     return jsonify({"message": "Expense deleted"}), 200
+
+@expense_bp.route('/expenses/categorize', methods=['POST'])
+def categorize_expense_route():
+    data = request.get_json()
+    desc = data.get('description', '')
+    category = categorize_expense(desc) if len(desc) >= 1 else "Other"
+    return jsonify({ "category": category }), 200

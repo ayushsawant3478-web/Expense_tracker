@@ -11,6 +11,7 @@ import Navbar from '../components/Navbar';
 import { FINANCIAL_TIPS } from '../constants';
 import LiveMarketData from '../components/LiveMarketData';
 import GoalTracker from '../components/GoalTracker';
+import { useEffect as ReactUseEffect, useRef } from 'react';
 
 export default function DashboardPage() {
   const { user, isDemo } = useAuth();
@@ -171,8 +172,28 @@ export default function DashboardPage() {
 
   if (!user) return null;
 
+  function AnimatedStat({ value }: { value: number }) {
+    const nodeRef = useRef<HTMLParagraphElement | null>(null);
+    ReactUseEffect(() => {
+      const el = nodeRef.current;
+      if (!el) return;
+      const start = performance.now();
+      const duration = 900;
+      const from = 0;
+      const to = value;
+      const step = (t: number) => {
+        const progress = Math.min(1, (t - start) / duration);
+        const current = from + (to - from) * progress;
+        el.textContent = `₹${current.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+        if (progress < 1) requestAnimationFrame(step);
+      };
+      requestAnimationFrame(step);
+    }, [value]);
+    return <p ref={nodeRef} className="text-3xl font-mono font-extrabold" />;
+  }
+
   return (
-    <div className="min-h-screen bg-[#020617] text-white">
+    <div className="min-h-screen">
       <Navbar />
       
       <main className="max-w-7xl mx-auto px-6 py-10">
@@ -182,7 +203,7 @@ export default function DashboardPage() {
             animate={{ opacity: 1, x: 0 }}
           >
             <div className="flex items-center gap-3 mb-2">
-              <h1 className="text-4xl font-bold tracking-tight">Financial Overview</h1>
+              <h1 className="text-5xl font-extrabold tracking-tight title-gradient">Financial Overview</h1>
               {isDemo && (
                 <motion.span 
                   initial={{ scale: 0.8, opacity: 0 }}
@@ -193,13 +214,14 @@ export default function DashboardPage() {
                 </motion.span>
               )}
             </div>
-            <p className="text-slate-400">Welcome back, <span className="text-white font-semibold">{user.username}</span>. Here's your status for {currentMonth}.</p>
+            <p style={{ color: 'var(--text-secondary)' }}>Welcome back, <span className="font-semibold" style={{ color: 'var(--text-primary)' }}>{user.username}</span>. Here's your status for {currentMonth}.</p>
           </motion.div>
           
           <motion.div 
             initial={{ opacity: 0, x: 20 }}
             animate={{ opacity: 1, x: 0 }}
-            className="flex items-center gap-4 glass p-2 rounded-2xl"
+            className="flex items-center gap-4 p-2 rounded-2xl"
+            style={{ background: 'var(--bg-card)', border: '1px solid var(--border-card)' }}
           >
             <button className="p-2 hover:bg-white/5 rounded-xl transition-colors">
               <Calendar className="w-5 h-5 text-slate-400" />
@@ -211,25 +233,31 @@ export default function DashboardPage() {
         {/* Stats Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
           {[
-            { label: 'Total Income', value: income, icon: TrendingUp, color: 'text-blue-400', bg: 'bg-blue-400/10' },
-            { label: 'Total Expenses', value: expenses, icon: TrendingDown, color: 'text-rose-400', bg: 'bg-rose-400/10' },
-            { label: 'Net Balance', value: netBalance, icon: Wallet, color: 'text-violet-400', bg: 'bg-violet-400/10' },
-            { label: 'Monthly Budget', value: currentBudgetAmount, icon: AlertCircle, color: 'text-blue-400', bg: 'bg-blue-400/10' },
+            { label: 'Total Income', value: income, icon: TrendingUp, color: 'text-blue-400', tint: 'rgba(59,130,246,0.05)', glow: '0 0 20px rgba(59,130,246,0.3)', accent: '#2563eb' },
+            { label: 'Total Expenses', value: expenses, icon: TrendingDown, color: 'text-rose-400', tint: 'rgba(239,68,68,0.05)', glow: '0 0 20px rgba(239,68,68,0.3)', accent: '#ef4444' },
+            { label: 'Net Balance', value: netBalance, icon: Wallet, color: 'text-violet-400', tint: 'rgba(139,92,246,0.05)', glow: '0 0 20px rgba(139,92,246,0.3)', accent: '#7c3aed' },
+            { label: 'Monthly Budget', value: currentBudgetAmount, icon: AlertCircle, color: 'text-cyan-400', tint: 'rgba(6,182,212,0.05)', glow: '0 0 20px rgba(6,182,212,0.3)', accent: '#06b6d4' },
           ].map((stat, i) => (
             <motion.div
               key={stat.label}
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: i * 0.1 }}
-              className="glass p-6 rounded-[24px] border-white/5 card-hover"
+              className="glass-card p-6 rounded-[24px] card-hover relative overflow-hidden"
+              style={{
+                background: `linear-gradient(${stat.tint}, ${stat.tint}), var(--bg-card)`,
+                border: '1px solid var(--border-card)',
+                boxShadow: 'var(--shadow-card)'
+              }}
             >
+              <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: '3px', background: stat.accent, opacity: 0.6 }} />
               <div className="flex items-center justify-between mb-4">
-                <div className={`w-10 h-10 ${stat.bg} rounded-xl flex items-center justify-center`}>
+                <div className="w-10 h-10 rounded-xl flex items-center justify-center" style={{ boxShadow: stat.glow, background: 'rgba(255,255,255,0.06)' }}>
                   <stat.icon className={`w-5 h-5 ${stat.color}`} />
                 </div>
               </div>
-              <p className="text-sm font-medium text-slate-400 mb-1">{stat.label}</p>
-              <p className="text-2xl font-mono font-bold">₹{stat.value.toLocaleString('en-IN', { minimumFractionDigits: 2 })}</p>
+              <p className="text-sm font-medium mb-1" style={{ color: 'var(--text-secondary)' }}>{stat.label}</p>
+              <AnimatedStat value={stat.value} />
             </motion.div>
           ))}
         </div>
@@ -240,21 +268,22 @@ export default function DashboardPage() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.4 }}
-            className="lg:col-span-2 glass p-8 rounded-[24px] border-white/5 flex flex-col justify-center"
+            className="lg:col-span-2 glass-card p-8 rounded-[24px] flex flex-col justify-center"
+            style={{ background: 'var(--bg-card)', border: '1px solid var(--border-card)', boxShadow: 'var(--shadow-card)' }}
           >
             <div className="flex items-center justify-between mb-4">
               <h3 className="text-lg font-bold">Monthly Savings Rate</h3>
               <span className="text-violet-400 font-mono font-bold">{savingsRate}%</span>
             </div>
-            <div className="w-full bg-white/5 rounded-full h-5 overflow-hidden border border-white/5">
+            <div className="apple-progress">
               <motion.div 
                 initial={{ width: 0 }}
                 animate={{ width: `${Math.max(0, Math.min(100, parseFloat(savingsRate)))}%` }}
                 transition={{ duration: 1.5, ease: "easeOut" }}
-                className="bg-violet-500 h-full shadow-[0_0_20px_rgba(139,92,246,0.4)]"
+                className="apple-progress-fill"
               />
             </div>
-            <p className="text-xs text-slate-500 mt-4 italic">
+            <p className="text-xs mt-4 italic" style={{ color: 'var(--text-secondary)' }}>
               * Savings rate is calculated as (Income - Expenses) / Income.
             </p>
           </motion.div>
@@ -263,7 +292,8 @@ export default function DashboardPage() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.5 }}
-            className="glass p-8 rounded-[24px] border-white/5 bg-violet-500/5 relative overflow-hidden group"
+            className="glass-card p-8 rounded-[24px] relative overflow-hidden group"
+            style={{ background: 'var(--bg-card)', border: '1px solid var(--border-card)', boxShadow: 'var(--shadow-card)' }}
           >
             <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
               <Zap className="w-16 h-16 text-violet-500" />
@@ -272,7 +302,7 @@ export default function DashboardPage() {
               <Zap className="w-5 h-5 text-violet-500" />
               VittVantage Tip
             </h3>
-            <p className="text-slate-100 leading-relaxed text-sm">
+            <p className="leading-relaxed text-sm" style={{ color: 'var(--text-primary)' }}>
               "{randomTip}"
             </p>
           </motion.div>
@@ -291,14 +321,14 @@ export default function DashboardPage() {
           </h2>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             {getSuggestions().map((suggestion, i) => (
-              <div key={i} className="glass p-6 rounded-[24px] border-white/5 card-hover bg-white/5">
+              <div key={i} className="glass-card p-6 rounded-[24px] card-hover" style={{ background: 'var(--bg-card)', border: '1px solid var(--border-card)' }}>
                 <div className="flex items-center gap-3 mb-3">
-                  <div className="w-8 h-8 rounded-lg bg-white/5 flex items-center justify-center">
+                  <div className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ background: 'var(--bg-card)' }}>
                     <suggestion.icon className={`w-4 h-4 ${suggestion.color}`} />
                   </div>
                   <h4 className="font-bold text-sm">{suggestion.title}</h4>
                 </div>
-                <p className="text-xs text-slate-400 leading-relaxed">
+                <p className="text-xs leading-relaxed" style={{ color: 'var(--text-secondary)' }}>
                   {suggestion.desc}
                 </p>
               </div>
@@ -321,8 +351,8 @@ export default function DashboardPage() {
               <span className={`text-sm font-bold ${investmentTier.theme.text}`}>{investmentTier.name}: {investmentTier.range}</span>
             </div>
           </div>
-          <div className="glass p-6 rounded-[24px] border-white/5 mb-6">
-            <p className="text-sm font-medium text-slate-400 mb-1">Current Monthly Net Savings</p>
+          <div className="glass-card p-6 rounded-[24px] mb-6" style={{ background: 'var(--bg-card)', border: '1px solid var(--border-card)' }}>
+            <p className="text-sm font-medium mb-1" style={{ color: 'var(--text-secondary)' }}>Current Monthly Net Savings</p>
             <p className={`text-3xl font-mono font-bold ${investmentTier.theme.text}`}>₹{netBalance.toLocaleString('en-IN', { minimumFractionDigits: 2 })}</p>
           </div>
           <AnimatePresence mode="wait">
@@ -340,10 +370,10 @@ export default function DashboardPage() {
                   initial={{ opacity: 0, y: 12 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: i * 0.05 }}
-                  className={`glass p-6 rounded-[24px] border ${investmentTier.theme.border} card-hover ${investmentTier.theme.bg}`}
+                  className={`glass-card p-6 rounded-[24px] border ${investmentTier.theme.border} card-hover ${investmentTier.theme.bg}`}
                 >
                   <h4 className="font-bold text-sm mb-2">{s.title}</h4>
-                  <p className="text-xs text-slate-400 leading-relaxed">{s.desc}</p>
+                  <p className="text-xs leading-relaxed" style={{ color: 'var(--text-secondary)' }}>{s.desc}</p>
                 </motion.div>
               ))}
             </motion.div>
@@ -361,7 +391,7 @@ export default function DashboardPage() {
               initial={{ opacity: 0, height: 0 }}
               animate={{ opacity: 1, height: 'auto' }}
               exit={{ opacity: 0, height: 0 }}
-              className="mb-8 p-4 bg-rose-500/10 border border-rose-500/20 rounded-2xl flex items-center gap-4 text-rose-500"
+              className="mb-8 p-4 border border-rose-500/20 rounded-2xl flex items-center gap-4 text-rose-500"
             >
               <AlertCircle className="w-6 h-6 shrink-0" />
               <p className="font-medium">Budget Alert: You've exceeded your monthly limit by ₹{(expenses - currentBudgetAmount).toFixed(2)}!</p>
@@ -372,9 +402,9 @@ export default function DashboardPage() {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Left Column: Forms & Budget */}
           <div className="lg:col-span-1 space-y-8">
-            <section className="glass p-8 rounded-[32px] border-white/5">
+            <section className="glass-card p-8 rounded-[32px]" style={{ background: 'var(--bg-card)', border: '1px solid var(--border-card)' }}>
               <div className="flex items-center justify-between mb-6">
-                <h2 className="text-xl font-bold">Manage Budget</h2>
+                <h2 className="text-xl font-bold" style={{ color: 'var(--text-primary)' }}>Manage Budget</h2>
                 <button 
                   onClick={() => setIsEditingBudget(!isEditingBudget)}
                   className="p-2 hover:bg-white/5 rounded-xl transition-colors text-violet-500"
@@ -389,7 +419,8 @@ export default function DashboardPage() {
                     type="number"
                     value={budgetAmount}
                     onChange={(e) => setBudgetAmount(parseFloat(e.target.value))}
-                    className="w-full bg-white/5 border border-white/10 rounded-2xl px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-violet-500"
+                    className="w-full rounded-2xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-violet-500"
+                    style={{ background: 'var(--bg-input)', border: '1px solid var(--border-input)', color: 'var(--text-primary)' }}
                     placeholder="Enter budget in ₹"
                   />
                   <div className="flex gap-2">
@@ -398,14 +429,14 @@ export default function DashboardPage() {
                   </div>
                 </div>
               ) : (
-                <div className="p-4 bg-white/5 rounded-2xl border border-white/5">
-                  <p className="text-sm text-slate-400 mb-1">Current Monthly Limit</p>
+                <div className="p-4 rounded-2xl" style={{ background: 'var(--bg-card)', border: '1px solid var(--border-card)' }}>
+                  <p className="text-sm mb-1" style={{ color: 'var(--text-secondary)' }}>Current Monthly Limit</p>
                   <p className="text-2xl font-mono font-bold">₹{currentBudgetAmount.toLocaleString('en-IN')}</p>
                 </div>
               )}
             </section>
 
-            <section className="glass p-8 rounded-[32px] border-white/5">
+            <section className="glass-card p-8 rounded-[32px]" style={{ background: 'var(--bg-card)', border: '1px solid var(--border-card)' }}>
               <div className="flex p-1 bg-white/5 rounded-2xl mb-6">
                 <button 
                   onClick={() => setActiveTab('expense')}
@@ -437,14 +468,14 @@ export default function DashboardPage() {
 
           {/* Right Column: Charts & History */}
           <div className="lg:col-span-2 space-y-8">
-            <section className="glass p-8 rounded-[32px] border-white/5">
-              <h2 className="text-xl font-bold mb-8">Financial Analytics</h2>
+            <section className="glass-card p-8 rounded-[32px]" style={{ background: 'var(--bg-card)', border: '1px solid var(--border-card)' }}>
+              <h2 className="text-xl font-bold mb-8" style={{ color: 'var(--text-primary)' }}>Financial Analytics</h2>
               <ChartComponent transactions={transactions} />
             </section>
 
-            <section className="glass p-8 rounded-[32px] border-white/5">
+            <section className="glass-card p-8 rounded-[32px]" style={{ background: 'var(--bg-card)', border: '1px solid var(--border-card)' }}>
               <div className="flex items-center justify-between mb-8">
-                <h2 className="text-xl font-bold">Recent Transactions</h2>
+                <h2 className="text-xl font-bold" style={{ color: 'var(--text-primary)' }}>Recent Transactions</h2>
                 <button className="text-sm font-bold text-indigo-500 hover:text-indigo-400 transition-colors">View All</button>
               </div>
               
@@ -460,16 +491,17 @@ export default function DashboardPage() {
                       layout
                       initial={{ opacity: 0, x: -20 }}
                       animate={{ opacity: 1, x: 0 }}
-                      key={t.id}
-                      className="group p-4 bg-white/5 rounded-2xl border border-white/5 flex items-center justify-between hover:border-white/10 transition-all"
+                      key={`${t.type}-${t.id}`}
+                      className="group p-4 rounded-2xl flex items-center justify-between transition-all"
+                      style={{ background: 'rgba(255,255,255,0.03)' }}
                     >
                       <div className="flex items-center gap-4">
-                        <div className={`w-12 h-12 rounded-xl flex items-center justify-center ${t.type === 'income' ? 'bg-emerald-500/10 text-emerald-500' : 'bg-rose-500/10 text-rose-500'}`}>
+                        <div className={`w-12 h-12 rounded-[14px] flex items-center justify-center ${t.type === 'income' ? 'bg-emerald-500/10 text-emerald-400' : 'bg-rose-500/10 text-rose-400'}`} style={{ boxShadow: t.type === 'income' ? '0 0 12px rgba(16,185,129,0.25)' : '0 0 12px rgba(244,63,94,0.25)' }}>
                           {t.type === 'income' ? <Plus className="w-6 h-6" /> : <Minus className="w-6 h-6" />}
                         </div>
                         <div>
-                          <p className="font-bold">{t.description}</p>
-                          <p className="text-xs text-slate-500 font-mono">{t.date} • {t.category}</p>
+                          <p className="text-[15px] font-medium" style={{ color: 'var(--text-primary)' }}>{t.description}</p>
+                          <p className="text-[13px]" style={{ color: 'var(--text-secondary)' }}>{t.date} • {t.category}</p>
                         </div>
                       </div>
                       <div className="flex items-center gap-6">

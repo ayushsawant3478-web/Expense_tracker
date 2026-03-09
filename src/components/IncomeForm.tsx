@@ -61,19 +61,20 @@ export default function IncomeForm() {
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
       <div>
-        <label className="block text-sm font-medium text-slate-400 mb-1.5 ml-1">Description</label>
+        <label className="block text-sm font-medium mb-1.5 ml-1" style={{ color: 'var(--text-secondary)' }}>Description</label>
         <input
           type="text"
           value={description}
           onChange={(e) => setDescription(e.target.value)}
           required
-          className="w-full bg-white/5 border border-white/10 rounded-2xl px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-violet-500/50 focus:border-violet-500 transition-all"
+          className="w-full rounded-2xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-violet-500/50 focus:border-violet-500 transition-all apple-input"
+          style={{ background: 'var(--bg-input)', border: '1px solid var(--border-input)', color: 'var(--text-primary)' }}
           placeholder="e.g. Monthly Salary"
         />
       </div>
       <div className="grid grid-cols-2 gap-4">
         <div>
-          <label className="block text-sm font-medium text-slate-400 mb-1.5 ml-1">Amount (₹)</label>
+          <label className="block text-sm font-medium mb-1.5 ml-1" style={{ color: 'var(--text-secondary)' }}>Amount (₹)</label>
           <input
             type="number"
             value={amount || ''}
@@ -81,17 +82,19 @@ export default function IncomeForm() {
             required
             min="0.01"
             step="0.01"
-            className="w-full bg-white/5 border border-white/10 rounded-2xl px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-violet-500/50 focus:border-violet-500 transition-all font-mono"
+            className="w-full rounded-2xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-violet-500/50 focus:border-violet-500 transition-all font-mono apple-input"
+            style={{ background: 'var(--bg-input)', border: '1px solid var(--border-input)', color: 'var(--text-primary)' }}
             placeholder="0.00"
           />
         </div>
         <div>
-          <label className="block text-sm font-medium text-slate-400 mb-1.5 ml-1">Source</label>
+          <label className="block text-sm font-medium mb-1.5 ml-1" style={{ color: 'var(--text-secondary)' }}>Source</label>
           <div className="relative">
             <select
             value={source}
             onChange={(e) => { setSource(e.target.value); setAutoDetected(false); }}
-            className="w-full bg-white/5 border border-white/10 rounded-2xl px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-violet-500/50 focus:border-violet-500 transition-all"
+            className="w-full rounded-2xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-violet-500/50 focus:border-violet-500 transition-all apple-input"
+            style={{ background: 'var(--bg-input)', border: '1px solid var(--border-input)', color: 'var(--text-primary)' }}
           >
             {INCOME_SOURCES.map(src => (
               <option key={src} value={src} className="bg-slate-900">{src}</option>
@@ -113,18 +116,19 @@ export default function IncomeForm() {
         </div>
       </div>
       <div>
-        <label className="block text-sm font-medium text-slate-400 mb-1.5 ml-1">Date</label>
+        <label className="block text-sm font-medium mb-1.5 ml-1" style={{ color: 'var(--text-secondary)' }}>Date</label>
         <input
           type="date"
           value={date}
           onChange={(e) => setDate(e.target.value)}
           required
-          className="w-full bg-white/5 border border-white/10 rounded-2xl px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-violet-500/50 focus:border-violet-500 transition-all"
+          className="w-full rounded-2xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-violet-500/50 focus:border-violet-500 transition-all apple-input"
+          style={{ background: 'var(--bg-input)', border: '1px solid var(--border-input)', color: 'var(--text-primary)' }}
         />
       </div>
       <button
         type="submit"
-        className="w-full py-4 bg-blue-600 text-white font-bold rounded-2xl hover:bg-blue-500 transition-all shadow-xl shadow-blue-500/10"
+        className="w-full apple-btn-primary"
       >
         Add Income
       </button>

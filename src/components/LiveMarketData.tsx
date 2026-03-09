@@ -108,7 +108,8 @@ export default function LiveMarketData({ savingsTier }: Props) {
         </h2>
         <button
           onClick={fetchData}
-          className="px-3 py-2 glass rounded-2xl text-sm font-bold flex items-center gap-2 hover:bg-white/10 transition-colors"
+          className="px-3 py-2 rounded-2xl text-sm font-bold flex items-center gap-2 transition-colors"
+          style={{ background: 'var(--bg-card)', border: '1px solid var(--border-card)' }}
         >
           <RefreshCw className="w-4 h-4 text-slate-300" />
           Refresh
@@ -116,7 +117,7 @@ export default function LiveMarketData({ savingsTier }: Props) {
       </div>
 
       {error && (
-        <div className="glass p-4 rounded-[24px] border border-rose-500/20 bg-rose-500/10 mb-6 text-rose-400 flex items-center justify-between">
+        <div className="glass-card p-4 rounded-[24px] mb-6 text-rose-400 flex items-center justify-between" style={{ background: 'rgba(239,68,68,0.05)', border: '1px solid var(--border-card)' }}>
           <span className="text-sm font-medium">Failed to load live data: {error}</span>
           <button onClick={fetchData} className="px-3 py-2 bg-rose-500/20 rounded-xl text-rose-300 hover:bg-rose-500/30 transition-colors text-sm font-bold">
             Retry
@@ -132,11 +133,12 @@ export default function LiveMarketData({ savingsTier }: Props) {
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: i * 0.05 }}
-              className="glass p-6 rounded-[24px] border-white/5"
+              className="glass-card p-6 rounded-[24px]"
+              style={{ background: 'var(--bg-card)', border: '1px solid var(--border-card)' }}
             >
-              <div className="w-full h-4 bg-white/5 rounded mb-3 animate-pulse" />
-              <div className="w-1/2 h-8 bg-white/5 rounded mb-2 animate-pulse" />
-              <div className="w-1/3 h-4 bg-white/5 rounded animate-pulse" />
+              <div className="w-full h-4 rounded mb-3 animate-pulse" style={{ background: 'var(--bg-input)' }} />
+              <div className="w-1/2 h-8 rounded mb-2 animate-pulse" style={{ background: 'var(--bg-input)' }} />
+              <div className="w-1/3 h-4 rounded animate-pulse" style={{ background: 'var(--bg-input)' }} />
             </motion.div>
           ))}
         </div>
@@ -153,7 +155,8 @@ export default function LiveMarketData({ savingsTier }: Props) {
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: i * 0.05 }}
-              className="glass p-6 rounded-[24px] border-white/5 relative overflow-hidden"
+              className="glass-card p-6 rounded-[24px] relative overflow-hidden"
+              style={{ background: 'var(--bg-card)', border: '1px solid var(--border-card)' }}
             >
               <div className="absolute top-3 right-3">
                 <span className="px-2 py-1 text-[10px] font-bold rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 animate-pulse">
@@ -171,12 +174,12 @@ export default function LiveMarketData({ savingsTier }: Props) {
                   {item.change_pct === null ? '' : `(${item.change_pct >= 0 ? '+' : ''}${item.change_pct.toFixed(2)}%)`}
                 </span>
               </div>
-              <p className="text-[10px] text-slate-500 mt-3">Updated: {item.updated_at ? new Date(item.updated_at).toLocaleString() : '—'}</p>
+              <p className="text-[10px] mt-3" style={{ color: 'var(--text-secondary)' }}>Updated: {item.updated_at ? new Date(item.updated_at).toLocaleString() : '—'}</p>
             </motion.div>
           ))}
           {itemsToShow.length === 0 && (
-            <div className="glass p-6 rounded-[24px] border-white/5">
-              <p className="text-sm text-slate-400">No live data for this savings tier.</p>
+            <div className="glass-card p-6 rounded-[24px]" style={{ background: 'var(--bg-card)', border: '1px solid var(--border-card)' }}>
+              <p className="text-sm" style={{ color: 'var(--text-secondary)' }}>No live data for this savings tier.</p>
             </div>
           )}
         </motion.div>

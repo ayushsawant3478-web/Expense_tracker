@@ -38,9 +38,15 @@ export default function App() {
     <AuthProvider>
       <ExpenseProvider>
         <GoalProvider>
-          <Router>
-            <AppContent />
-          </Router>
+          <div>
+            <div className="orb-violet" />
+            <div className="orb-blue" />
+            <div className="orb-pink" />
+            <div className="noise-overlay" />
+            <Router>
+              <AppContent />
+            </Router>
+          </div>
         </GoalProvider>
       </ExpenseProvider>
     </AuthProvider>

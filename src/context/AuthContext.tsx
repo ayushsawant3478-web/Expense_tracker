@@ -9,10 +9,12 @@ interface AuthContextType {
   register: (username: string, email: string, password: string) => Promise<void>;
   logout: () => void;
   isDemo: boolean;
-  setIsDemo: (val: boolean) => void;
+  activateDemo: () => void;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
+
+const demoUser = { id: 'demo', username: 'Demo User', email: 'demo@vittvantage.com' };
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(() => {
@@ -72,8 +74,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setIsDemo(false);
   };
 
+  const activateDemo = () => {
+    setIsDemo(true);
+    setUser(demoUser);
+  };
+
   return (
-    <AuthContext.Provider value={{ user, token, login, register, logout, isDemo, setIsDemo }}>
+    <AuthContext.Provider value={{ user, token, login, register, logout, isDemo, activateDemo }}>
       {children}
     </AuthContext.Provider>
   );

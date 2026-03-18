@@ -9,6 +9,7 @@ interface GoalContextType {
   addGoal: (g: Omit<Goal, 'id' | 'progress'>) => Promise<void>;
   updateGoalSavings: (id: string, amount: number) => Promise<void>;
   deleteGoal: (id: string) => Promise<void>;
+  loadDemoGoals: () => void;
 }
 
 const GoalContext = createContext<GoalContextType | undefined>(undefined);
@@ -94,8 +95,18 @@ export function GoalProvider({ children }: { children: ReactNode }) {
     }
   };
 
+  const loadDemoGoals = () => {
+    const today = new Date();
+    const deadline1 = new Date(today.getFullYear(), today.getMonth() + 6, today.getDate()).toISOString().split('T')[0];
+    const deadline2 = new Date(today.getFullYear(), today.getMonth() + 3, today.getDate()).toISOString().split('T')[0];
+    setGoals([
+      { id: 'dg1', name: 'Buy Laptop', target_amount: 70000, saved_amount: 18500, deadline: deadline1, progress: 26 },
+      { id: 'dg2', name: 'Goa Trip', target_amount: 25000, saved_amount: 8000, deadline: deadline2, progress: 32 },
+    ]);
+  };
+
   return (
-    <GoalContext.Provider value={{ goals, fetchGoals, addGoal, updateGoalSavings, deleteGoal }}>
+    <GoalContext.Provider value={{ goals, fetchGoals, addGoal, updateGoalSavings, deleteGoal, loadDemoGoals }}>
       {children}
     </GoalContext.Provider>
   );

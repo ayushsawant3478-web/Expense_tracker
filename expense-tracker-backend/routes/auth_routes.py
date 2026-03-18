@@ -1,3 +1,6 @@
+from google.oauth2 import id_token
+from google.auth.transport import requests as google_requests
+import os
 from flask import Blueprint, request, jsonify
 from models.user import create_user, get_user_by_email
 from flask_bcrypt import Bcrypt
@@ -21,3 +24,39 @@ def login():
         return jsonify({"message": "Invalid credentials"}), 401
     token = create_access_token(identity=str(user['id']))
     return jsonify({"token": token, "user": {"id": user['id'], "name": user['name'], "email": user['email']}}), 200
+@auth_bp.route('/auth/google', methods=['POST'])
+def google_login():
+    try:
+        data = request.get_json()
+        token = data.get('credential')
+
+        id_info = id_token.verify_oauth2_token(
+            token,
+            google_requests.Request(),
+            os.getenv("GOOGLE_CLIENT_ID")
+        )
+
+        email = id_info.get('email')
+        name = id_info.get('name', email.split('@')[0])
+
+        user = get_user_by_email(email)
+        if not user:
+            import secrets
+            from flask_bcrypt import Bcrypt
+            bcrypt = Bcrypt()
+            hashed = bcrypt.generate_password_hash(secrets.token_hex(16)).decode('utf-8')
+            create_user(name, email, hashed)
+            user = get_user_by_email(email)
+
+        access_token = create_access_token(identity=str(user['id']))
+        return jsonify({
+            "token": access_token,
+            "user": {
+                "id": user['id'],
+                "username": user['name'],
+                "email": user['email']
+            }
+        })
+
+    except Exception as e:
+        return jsonify({"error": str(e)}), 400

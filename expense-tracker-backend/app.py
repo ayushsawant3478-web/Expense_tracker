@@ -27,7 +27,14 @@ app.config["JWT_SECRET_KEY"] = os.getenv("JWT_SECRET_KEY")
 
 jwt = JWTManager(app)
 bcrypt = Bcrypt(app)
-CORS(app, origins=["http://localhost:3000", "http://localhost:3001", "http://127.0.0.1:3000", "http://127.0.0.1:3001"])
+CORS(app, origins=[
+    "http://localhost:3000",
+    "http://localhost:3001",
+    "http://localhost:3002",
+    "http://127.0.0.1:3000",
+    "http://127.0.0.1:3001",
+    "http://127.0.0.1:3002",
+])
 app.register_blueprint(auth_bp)
 app.register_blueprint(expense_bp)
 app.register_blueprint(income_bp)

@@ -126,7 +126,7 @@ export default function LiveMarketData({ savingsTier }: Props) {
       )}
 
       {loading ? (
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {[...Array(3)].map((_, i) => (
             <motion.div
               key={i}
@@ -143,19 +143,14 @@ export default function LiveMarketData({ savingsTier }: Props) {
           ))}
         </div>
       ) : (
-        <motion.div
-          initial={{ opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.2 }}
-          className="grid grid-cols-1 md:grid-cols-3 gap-6"
-        >
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {itemsToShow.map((item, i) => (
             <motion.div
               key={`${item.name}-${i}`}
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: i * 0.05 }}
-              className="glass-card p-6 rounded-[24px] relative overflow-hidden"
+              className="glass-card p-6 rounded-[24px] relative overflow-hidden min-w-[250px]"
               style={{ background: 'var(--bg-card)', border: '1px solid var(--border-card)' }}
             >
               <div className="absolute top-3 right-3">
@@ -163,7 +158,7 @@ export default function LiveMarketData({ savingsTier }: Props) {
                   LIVE
                 </span>
               </div>
-              <h4 className="font-bold text-sm mb-3">{item.name}</h4>
+              <h4 className="font-bold text-sm mb-3 pr-16">{item.name}</h4>
               <p className="text-2xl font-mono font-bold mb-2">₹{item.price !== null ? item.price.toLocaleString('en-IN', { minimumFractionDigits: 2 }) : '—'}</p>
               <div className="flex items-center gap-2">
                 <StatusIcon change={item.change} />
@@ -174,7 +169,9 @@ export default function LiveMarketData({ savingsTier }: Props) {
                   {item.change_pct === null ? '' : `(${item.change_pct >= 0 ? '+' : ''}${item.change_pct.toFixed(2)}%)`}
                 </span>
               </div>
-              <p className="text-[10px] mt-3" style={{ color: 'var(--text-secondary)' }}>Updated: {item.updated_at ? new Date(item.updated_at).toLocaleString() : '—'}</p>
+              <p className="text-[10px] mt-3" style={{ color: 'var(--text-secondary)' }}>
+                Updated: {item.updated_at ? new Date(item.updated_at).toLocaleString('en-IN') : new Date().toLocaleString('en-IN')}
+              </p>
             </motion.div>
           ))}
           {itemsToShow.length === 0 && (
@@ -182,7 +179,7 @@ export default function LiveMarketData({ savingsTier }: Props) {
               <p className="text-sm" style={{ color: 'var(--text-secondary)' }}>No live data for this savings tier.</p>
             </div>
           )}
-        </motion.div>
+        </div>
       )}
     </section>
   );

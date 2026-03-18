@@ -6,14 +6,21 @@ interface ChartComponentProps {
   transactions: Transaction[];
 }
 
-const COLORS = ['#8b5cf6', '#3b82f6', '#8b5cf6', '#ec4899', '#f43f5e', '#10b981'];
-
+const COLORS = [
+  '#8b5cf6', // violet - Food
+  '#3b82f6', // blue - Travel  
+  '#f59e0b', // amber - Bills
+  '#10b981', // emerald - Shopping
+  '#ec4899', // pink - Entertainment
+  '#f43f5e', // rose - Health
+  '#06b6d4', // cyan - Education
+  '#f97316', // orange - Other
+];
 export default function ChartComponent({ transactions }: ChartComponentProps) {
   const { theme } = useTheme();
   const chartTheme = {
     dark: { grid: '#1e293b', text: '#94a3b8', tooltip: { bg: '#1e293b', text: '#fff' } },
-    light: { grid: '#e2e8f0', text: '#64748b', tooltip: { bg: '#ffffff', text: '#0f172a' } },
-    glass: { grid: 'rgba(255,255,255,0.04)', text: 'rgba(255,255,255,0.3)', tooltip: { bg: 'rgba(255,255,255,0.12)', text: '#fff' } }
+    light: { grid: '#e2e8f0', text: '#64748b', tooltip: { bg: '#ffffff', text: '#0f172a' } }
   } as const;
   const t = chartTheme[theme];
   const dataForPieChart = transactions.reduce((acc, transaction) => {

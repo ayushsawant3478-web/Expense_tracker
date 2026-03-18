@@ -1,9 +1,10 @@
 import { useAuth } from '../context/AuthContext';
+import ChatBot from '../components/ChatBot';
 import { useExpense } from '../context/ExpenseContext';
-import { useNavigate } from 'react-router-dom';
-import { useEffect, useState, useMemo } from 'react';
+import { useNavigate, Link } from 'react-router-dom';
+import { useEffect, useState, useMemo, useRef } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { Plus, Minus, TrendingUp, TrendingDown, Wallet, Calendar, Trash2, Edit2, AlertCircle, Zap } from 'lucide-react';
+import { Plus, Minus, TrendingUp, TrendingDown, Wallet, Calendar, Trash2, Edit2, AlertCircle, Zap, ChevronLeft, ChevronRight, Download, X } from 'lucide-react';
 import ExpenseForm from '../components/ExpenseForm';
 import IncomeForm from '../components/IncomeForm';
 import ChartComponent from '../components/ChartComponent';
@@ -11,34 +12,62 @@ import Navbar from '../components/Navbar';
 import { FINANCIAL_TIPS } from '../constants';
 import LiveMarketData from '../components/LiveMarketData';
 import GoalTracker from '../components/GoalTracker';
-import { useEffect as ReactUseEffect, useRef } from 'react';
+import * as XLSX from 'xlsx';
+import { saveAs } from 'file-saver';
 
 export default function DashboardPage() {
   const { user, isDemo } = useAuth();
   const { transactions, budgets, getMonthlySummary, addBudget, deleteTransaction } = useExpense();
   const navigate = useNavigate();
 
+  const [showWelcome, setShowWelcome] = useState(false);
+
+  // Show banner when user loads
+  useEffect(() => {
+    if (user || isDemo) {
+      const key = `vittvantage_welcomed_${user?.id || 'demo'}`;
+      if (!sessionStorage.getItem(key)) {
+        setShowWelcome(true);
+      }
+    }
+  }, [user, isDemo]);
+
+  // Auto dismiss after 4 seconds
+  useEffect(() => {
+    if (showWelcome) {
+      const key = `vittvantage_welcomed_${user?.id || 'demo'}`;
+      sessionStorage.setItem(key, 'true');
+      const timer = setTimeout(() => setShowWelcome(false), 4000);
+      return () => clearTimeout(timer);
+    }
+  }, [showWelcome]);
+
+  const getGreeting = () => {
+    const hour = new Date().getHours();
+    if (hour < 12) return 'Good Morning';
+    if (hour < 17) return 'Good Afternoon';
+    if (hour < 21) return 'Good Evening';
+    return 'Good Night';
+  };
+
   const [currentMonth, setCurrentMonth] = useState(() => {
     const date = new Date();
     return `${date.getFullYear()}-${(date.getMonth() + 1).toString().padStart(2, '0')}`;
   });
-
   const [budgetAmount, setBudgetAmount] = useState(0);
   const [isEditingBudget, setIsEditingBudget] = useState(false);
   const [activeTab, setActiveTab] = useState<'expense' | 'income'>('expense');
 
   useEffect(() => {
-    if (!user) {
-      navigate('/login');
-    }
-  }, [user, navigate]);
+    if (!user && !isDemo) navigate('/login');
+  }, [user, isDemo, navigate]);
 
   useEffect(() => {
     const budget = budgets.find(b => b.month === currentMonth);
     setBudgetAmount(budget?.amount || 0);
   }, [budgets, currentMonth]);
 
-  const { income, expenses, budgetAmount: currentBudgetAmount, netBalance } = getMonthlySummary(currentMonth);
+  const { income, expenses, budgetAmount: currentBudgetAmount, netBalance, availableSavings } = getMonthlySummary(currentMonth);
   const budgetExceeded = currentBudgetAmount > 0 && expenses > currentBudgetAmount;
 
   const handleSaveBudget = () => {
@@ -46,11 +75,70 @@ export default function DashboardPage() {
     setIsEditingBudget(false);
   };
 
-  const savingsRate = income > 0 ? ((netBalance / income) * 100).toFixed(1) : "0.0";
+  const goToPrevMonth = () => {
+    const [year, month] = currentMonth.split('-').map(Number);
+    const date = new Date(year, month - 2);
+    setCurrentMonth(`${date.getFullYear()}-${(date.getMonth() + 1).toString().padStart(2, '0')}`);
+  };
+
+  const goToNextMonth = () => {
+    const [year, month] = currentMonth.split('-').map(Number);
+    const date = new Date(year, month);
+    setCurrentMonth(`${date.getFullYear()}-${(date.getMonth() + 1).toString().padStart(2, '0')}`);
+  };
+
+  const isCurrentMonth = () => {
+    const now = new Date();
+    const current = `${now.getFullYear()}-${(now.getMonth() + 1).toString().padStart(2, '0')}`;
+    return currentMonth === current;
+  };
+
+  const getMonthLabel = () => {
+    const [year, month] = currentMonth.split('-').map(Number);
+    return new Date(year, month - 1).toLocaleString('default', { month: 'long', year: 'numeric' });
+  };
+
+  const monthlyTransactions = transactions.filter(t => t.date.startsWith(currentMonth));
+  const savingsRate = income > 0 ? ((availableSavings / income) * 100).toFixed(1) : "0.0";
 
   const randomTip = useMemo(() => {
     return FINANCIAL_TIPS[Math.floor(Math.random() * FINANCIAL_TIPS.length)];
   }, []);
+
+  const exportToExcel = () => {
+    const summary = [
+      ['VittVantage — Monthly Report', ''],
+      ['Month', getMonthLabel()],
+      ['Generated On', new Date().toLocaleDateString('en-IN')],
+      ['', ''],
+      ['SUMMARY', ''],
+      ['Total Income', income],
+      ['Total Expenses', expenses],
+      ['Net Balance', netBalance],
+      ['Monthly Budget', currentBudgetAmount],
+      ['Savings Rate', `${savingsRate}%`],
+    ];
+    const transactionRows = [
+      ['Date', 'Description', 'Type', 'Category', 'Amount (₹)'],
+      ...monthlyTransactions.slice().reverse().map(t => [
+        t.date,
+        t.description,
+        t.type === 'income' ? 'Income' : 'Expense',
+        t.category,
+        t.type === 'income' ? t.amount : -t.amount
+      ])
+    ];
+    const wb = XLSX.utils.book_new();
+    const summarySheet = XLSX.utils.aoa_to_sheet(summary);
+    summarySheet['!cols'] = [{ wch: 25 }, { wch: 20 }];
+    XLSX.utils.book_append_sheet(wb, summarySheet, 'Summary');
+    const txSheet = XLSX.utils.aoa_to_sheet(transactionRows);
+    txSheet['!cols'] = [{ wch: 15 }, { wch: 25 }, { wch: 12 }, { wch: 15 }, { wch: 15 }];
+    XLSX.utils.book_append_sheet(wb, txSheet, 'Transactions');
+    const excelBuffer = XLSX.write(wb, { bookType: 'xlsx', type: 'array' });
+    const blob = new Blob([excelBuffer], { type: 'application/octet-stream' });
+    saveAs(blob, `VittVantage_${currentMonth}.xlsx`);
+  };
 
   const getSuggestions = () => {
     const suggestions = [];
@@ -88,70 +176,55 @@ export default function DashboardPage() {
     }
     return suggestions;
   };
+
   const getInvestmentPlan = (s: number) => {
-    if (s <= 0) {
-      return {
-        name: "No Savings",
-        range: "₹0 or Negative",
-        theme: { text: "text-rose-400", bg: "bg-rose-500/10", border: "border-rose-500/20" },
-        suggestions: [
-          { title: "Cut Expenses", desc: "Reduce discretionary spends and renegotiate bills to lower recurring costs." },
-          { title: "Track Spending", desc: "Use category tracking to spot leaks and set weekly caps." },
-          { title: "Start Emergency Fund", desc: "Park small amounts regularly to build a 1-month buffer." }
-        ]
-      };
-    }
-    if (s > 0 && s <= 2000) {
-      return {
-        name: "Starter",
-        range: "₹1 - ₹2,000",
-        theme: { text: "text-amber-400", bg: "bg-amber-500/10", border: "border-amber-500/20" },
-        suggestions: [
-          { title: "Digital Gold", desc: "Begin with tiny ticket sizes to build a habit." },
-          { title: "Recurring Deposit", desc: "Automate a monthly RD with a fixed term." },
-          { title: "Round-up Apps", desc: "Use round-up savings to capture spare change." }
-        ]
-      };
-    }
-    if (s > 2000 && s <= 5000) {
-      return {
-        name: "Growing",
-        range: "₹2,000 - ₹5,000",
-        theme: { text: "text-amber-400", bg: "bg-amber-500/10", border: "border-amber-500/20" },
-        suggestions: [
-          { title: "Mutual Fund SIP", desc: "Start diversified equity or hybrid SIPs." },
-          { title: "Liquid Funds", desc: "Keep short-term surplus accessible and low-risk." },
-          { title: "Open PPF", desc: "Lock long-term savings with tax benefits." }
-        ]
-      };
-    }
-    if (s > 5000 && s <= 10000) {
-      return {
-        name: "Moderate",
-        range: "₹5,000 - ₹10,000",
-        theme: { text: "text-emerald-400", bg: "bg-emerald-500/10", border: "border-emerald-500/20" },
-        suggestions: [
-          { title: "Index Funds", desc: "Allocate core exposure to broad market indices." },
-          { title: "US ETFs", desc: "Add international diversification within limits." },
-          { title: "Fixed Deposits", desc: "Stabilize portion with assured returns." }
-        ]
-      };
-    }
-    if (s > 10000 && s <= 25000) {
-      return {
-        name: "Strong",
-        range: "₹10,000 - ₹25,000",
-        theme: { text: "text-emerald-400", bg: "bg-emerald-500/10", border: "border-emerald-500/20" },
-        suggestions: [
-          { title: "Diversified Portfolio", desc: "Balance equity, debt, and international exposure." },
-          { title: "Blue Chip Stocks", desc: "Add quality large-caps for stability." },
-          { title: "NPS Pension", desc: "Contribute for long-term retirement corpus and tax." }
-        ]
-      };
-    }
+    if (s <= 0) return {
+      name: "No Savings", range: "₹0 or Negative",
+      theme: { text: "text-rose-400", bg: "bg-rose-500/10", border: "border-rose-500/20" },
+      suggestions: [
+        { title: "Cut Expenses", desc: "Reduce discretionary spends and renegotiate bills to lower recurring costs." },
+        { title: "Track Spending", desc: "Use category tracking to spot leaks and set weekly caps." },
+        { title: "Start Emergency Fund", desc: "Park small amounts regularly to build a 1-month buffer." }
+      ]
+    };
+    if (s <= 2000) return {
+      name: "Starter", range: "₹1 - ₹2,000",
+      theme: { text: "text-amber-400", bg: "bg-amber-500/10", border: "border-amber-500/20" },
+      suggestions: [
+        { title: "Digital Gold", desc: "Begin with tiny ticket sizes to build a habit." },
+        { title: "Recurring Deposit", desc: "Automate a monthly RD with a fixed term." },
+        { title: "Round-up Apps", desc: "Use round-up savings to capture spare change." }
+      ]
+    };
+    if (s <= 5000) return {
+      name: "Growing", range: "₹2,000 - ₹5,000",
+      theme: { text: "text-amber-400", bg: "bg-amber-500/10", border: "border-amber-500/20" },
+      suggestions: [
+        { title: "Mutual Fund SIP", desc: "Start diversified equity or hybrid SIPs." },
+        { title: "Liquid Funds", desc: "Keep short-term surplus accessible and low-risk." },
+        { title: "Open PPF", desc: "Lock long-term savings with tax benefits." }
+      ]
+    };
+    if (s <= 10000) return {
+      name: "Moderate", range: "₹5,000 - ₹10,000",
+      theme: { text: "text-emerald-400", bg: "bg-emerald-500/10", border: "border-emerald-500/20" },
+      suggestions: [
+        { title: "Index Funds", desc: "Allocate core exposure to broad market indices." },
+        { title: "US ETFs", desc: "Add international diversification within limits." },
+        { title: "Fixed Deposits", desc: "Stabilize portion with assured returns." }
+      ]
+    };
+    if (s <= 25000) return {
+      name: "Strong", range: "₹10,000 - ₹25,000",
+      theme: { text: "text-emerald-400", bg: "bg-emerald-500/10", border: "border-emerald-500/20" },
+      suggestions: [
+        { title: "Diversified Portfolio", desc: "Balance equity, debt, and international exposure." },
+        { title: "Blue Chip Stocks", desc: "Add quality large-caps for stability." },
+        { title: "NPS Pension", desc: "Contribute for long-term retirement corpus and tax." }
+      ]
+    };
     return {
-      name: "Excellent",
-      range: "Above ₹25,000",
+      name: "Excellent", range: "Above ₹25,000",
       theme: { text: "text-emerald-400", bg: "bg-emerald-500/10", border: "border-emerald-500/20" },
       suggestions: [
         { title: "REITs", desc: "Gain real estate exposure via yield-focused trusts." },
@@ -160,30 +233,29 @@ export default function DashboardPage() {
       ]
     };
   };
-  const investmentTier = useMemo(() => getInvestmentPlan(netBalance), [netBalance]);
-  const savingsTier: 'none' | 'starter' | 'growing' | 'moderate' | 'good' | 'excellent' = useMemo(() => {
-    if (netBalance <= 0) return 'none';
-    if (netBalance < 2000) return 'starter';
-    if (netBalance < 5000) return 'growing';
-    if (netBalance < 10000) return 'moderate';
-    if (netBalance < 25000) return 'good';
-    return 'excellent';
-  }, [netBalance]);
 
-  if (!user) return null;
+  const investmentTier = useMemo(() => getInvestmentPlan(availableSavings), [availableSavings]);
+
+  const savingsTier: 'none' | 'starter' | 'growing' | 'moderate' | 'good' | 'excellent' = useMemo(() => {
+    if (availableSavings <= 0) return 'none';
+    if (availableSavings < 2000) return 'starter';
+    if (availableSavings < 5000) return 'growing';
+    if (availableSavings < 10000) return 'moderate';
+    if (availableSavings < 25000) return 'good';
+    return 'excellent';
+  }, [availableSavings]);
 
   function AnimatedStat({ value }: { value: number }) {
     const nodeRef = useRef<HTMLParagraphElement | null>(null);
-    ReactUseEffect(() => {
+    useEffect(() => {
       const el = nodeRef.current;
       if (!el) return;
       const start = performance.now();
       const duration = 900;
-      const from = 0;
       const to = value;
       const step = (t: number) => {
         const progress = Math.min(1, (t - start) / duration);
-        const current = from + (to - from) * progress;
+        const current = to * progress;
         el.textContent = `₹${current.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
         if (progress < 1) requestAnimationFrame(step);
       };
@@ -192,20 +264,161 @@ export default function DashboardPage() {
     return <p ref={nodeRef} className="text-3xl font-mono font-extrabold" />;
   }
 
+  if (!user && !isDemo) return null;
+
+  const displayUser = user || { username: 'Demo User', email: 'demo@vittvantage.com', id: 'demo' };
+
   return (
     <div className="min-h-screen">
       <Navbar />
-      
-      <main className="max-w-7xl mx-auto px-6 py-10">
-        <header className="mb-12 flex flex-col md:flex-row md:items-center justify-between gap-6">
+
+      {/* Welcome Banner */}
+      <AnimatePresence>
+        {showWelcome && (
           <motion.div
-            initial={{ opacity: 0, x: -20 }}
-            animate={{ opacity: 1, x: 0 }}
+            initial={{ opacity: 0, y: -40 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -40 }}
+            transition={{ type: 'spring', stiffness: 300, damping: 25 }}
+            className="relative overflow-hidden"
+            style={{
+              background: 'linear-gradient(135deg, rgba(124,58,237,0.18), rgba(37,99,235,0.12))',
+              borderBottom: '1px solid rgba(139,92,246,0.25)',
+              backdropFilter: 'blur(12px)',
+            }}
           >
+            {/* Glow orb */}
+            <div
+              className="absolute -top-10 left-1/2 -translate-x-1/2 w-[600px] h-[100px] rounded-full pointer-events-none"
+              style={{ background: 'rgba(139,92,246,0.15)', filter: 'blur(40px)' }}
+            />
+
+            <div className="max-w-7xl mx-auto px-6 py-5 flex items-center justify-between gap-4 relative z-10">
+              <div className="flex items-center gap-5">
+
+                {/* Avatar */}
+                <div
+                  className="w-12 h-12 rounded-2xl flex items-center justify-center flex-shrink-0 text-xl font-bold text-white shadow-lg"
+                  style={{
+                    background: 'linear-gradient(135deg, #7c3aed, #2563eb)',
+                    boxShadow: '0 0 20px rgba(124,58,237,0.4)'
+                  }}
+                >
+                  {displayUser.username.charAt(0).toUpperCase()}
+                </div>
+
+                <div>
+                  {/* Greeting */}
+                  <div className="flex items-center gap-2 mb-0.5 flex-wrap">
+                    <span className="text-base font-extrabold tracking-tight" style={{ color: 'var(--text-primary)' }}>
+                      {getGreeting()},
+                    </span>
+                    <span
+                      className="text-base font-extrabold tracking-tight"
+                      style={{
+                        background: 'linear-gradient(135deg, #a78bfa, #60a5fa)',
+                        WebkitBackgroundClip: 'text',
+                        WebkitTextFillColor: 'transparent',
+                      }}
+                    >
+                      {displayUser.username}!
+                    </span>
+                    <span className="text-base">👋</span>
+                  </div>
+
+                  {/* Pills */}
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <p className="text-xs font-medium" style={{ color: 'var(--text-secondary)' }}>
+                      Ready to track your finances today?
+                    </p>
+                    <span
+                      className="text-xs font-bold px-2 py-0.5 rounded-full"
+                      style={{
+                        background: 'rgba(16,185,129,0.15)',
+                        color: '#10b981',
+                        border: '1px solid rgba(16,185,129,0.2)'
+                      }}
+                    >
+                      ₹{availableSavings.toLocaleString('en-IN')} saved
+                    </span>
+                    <span
+                      className="text-xs font-bold px-2 py-0.5 rounded-full"
+                      style={{
+                        background: 'rgba(139,92,246,0.15)',
+                        color: '#a78bfa',
+                        border: '1px solid rgba(139,92,246,0.2)'
+                      }}
+                    >
+                      {monthlyTransactions.length} transactions
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Right side */}
+              <div className="flex items-center gap-3 flex-shrink-0">
+                <Link
+                  to="/analytics"
+                  className="hidden sm:flex items-center gap-2 px-4 py-2 text-xs font-bold rounded-xl transition-all hover:scale-105"
+                  style={{
+                    background: 'rgba(139,92,246,0.15)',
+                    border: '1px solid rgba(139,92,246,0.25)',
+                    color: '#a78bfa'
+                  }}
+                >
+                  View Analytics →
+                </Link>
+                <button
+                  onClick={() => setShowWelcome(false)}
+                  className="p-2 rounded-xl transition-all hover:bg-white/10 hover:scale-110"
+                  style={{ color: 'var(--text-secondary)' }}
+                >
+                  <X className="w-4 h-4" />
+                </button>
+              </div>
+            </div>
+
+            {/* Auto-dismiss progress bar */}
+            <motion.div
+              initial={{ width: '100%' }}
+              animate={{ width: '0%' }}
+              transition={{ duration: 4, ease: 'linear' }}
+              className="absolute bottom-0 left-0 h-[2px]"
+              style={{ background: 'linear-gradient(90deg, #7c3aed, #60a5fa, #a78bfa)' }}
+            />
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      <main className="max-w-7xl mx-auto px-6 py-10">
+
+        {/* Demo Banner */}
+        {isDemo && (
+          <div
+            className="mb-6 p-4 rounded-2xl flex items-center justify-between flex-wrap gap-3"
+            style={{ background: 'rgba(139,92,246,0.1)', border: '1px solid rgba(139,92,246,0.2)' }}
+          >
+            <p className="text-sm font-medium text-violet-400">
+              👋 You are in Demo Mode.{' '}
+              <Link to="/register" className="underline font-bold">Create a free account</Link>{' '}
+              to save your data.
+            </p>
+            <Link
+              to="/register"
+              className="px-4 py-2 bg-violet-600 text-white text-sm font-bold rounded-xl hover:bg-violet-500 transition-all"
+            >
+              Get Started Free
+            </Link>
+          </div>
+        )}
+
+        {/* Header */}
+        <header className="mb-12 flex flex-col md:flex-row md:items-center justify-between gap-4 flex-wrap">
+          <motion.div initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }}>
             <div className="flex items-center gap-3 mb-2">
               <h1 className="text-5xl font-extrabold tracking-tight title-gradient">Financial Overview</h1>
               {isDemo && (
-                <motion.span 
+                <motion.span
                   initial={{ scale: 0.8, opacity: 0 }}
                   animate={{ scale: 1, opacity: 1 }}
                   className="px-3 py-1 bg-violet-500/10 border border-violet-500/20 text-violet-400 text-xs font-bold rounded-full uppercase tracking-widest"
@@ -214,20 +427,63 @@ export default function DashboardPage() {
                 </motion.span>
               )}
             </div>
-            <p style={{ color: 'var(--text-secondary)' }}>Welcome back, <span className="font-semibold" style={{ color: 'var(--text-primary)' }}>{user.username}</span>. Here's your status for {currentMonth}.</p>
+            <p style={{ color: 'var(--text-secondary)' }}>
+              Welcome back,{' '}
+              <span className="font-semibold" style={{ color: 'var(--text-primary)' }}>
+                {displayUser.username}
+              </span>
+              . Here's your status for{' '}
+              <span className="font-semibold text-violet-400">{getMonthLabel()}</span>.
+            </p>
           </motion.div>
-          
-          <motion.div 
-            initial={{ opacity: 0, x: 20 }}
-            animate={{ opacity: 1, x: 0 }}
-            className="flex items-center gap-4 p-2 rounded-2xl"
-            style={{ background: 'var(--bg-card)', border: '1px solid var(--border-card)' }}
-          >
-            <button className="p-2 hover:bg-white/5 rounded-xl transition-colors">
-              <Calendar className="w-5 h-5 text-slate-400" />
-            </button>
-            <span className="font-mono font-bold text-sm px-4">{currentMonth}</span>
-          </motion.div>
+
+          <div className="flex items-center gap-3 flex-wrap">
+            {/* Month Switcher */}
+            <motion.div
+              initial={{ opacity: 0, x: 20 }}
+              animate={{ opacity: 1, x: 0 }}
+              className="flex items-center gap-2 p-2 rounded-2xl"
+              style={{ background: 'var(--bg-card)', border: '1px solid var(--border-card)' }}
+            >
+              <button
+                onClick={goToPrevMonth}
+                className="p-2 hover:bg-white/10 rounded-xl transition-colors"
+                style={{ color: 'var(--text-secondary)' }}
+              >
+                <ChevronLeft className="w-5 h-5" />
+              </button>
+              <div className="flex items-center gap-2 px-2">
+                <Calendar className="w-4 h-4 text-violet-400" />
+                <span className="font-mono font-bold text-sm min-w-[140px] text-center">{getMonthLabel()}</span>
+              </div>
+              <button
+                onClick={goToNextMonth}
+                disabled={isCurrentMonth()}
+                className={`p-2 rounded-xl transition-colors ${isCurrentMonth() ? 'opacity-30 cursor-not-allowed' : 'hover:bg-white/10'}`}
+                style={{ color: 'var(--text-secondary)' }}
+              >
+                <ChevronRight className="w-5 h-5" />
+              </button>
+            </motion.div>
+
+            {/* Export Button */}
+            <motion.button
+              initial={{ opacity: 0, x: 20 }}
+              animate={{ opacity: 1, x: 0 }}
+              whileTap={{ scale: 0.95 }}
+              whileHover={{ scale: 1.03 }}
+              onClick={exportToExcel}
+              className="flex items-center gap-2 px-4 py-3 rounded-2xl text-sm font-bold transition-all"
+              style={{
+                background: 'rgba(16,185,129,0.1)',
+                border: '1px solid rgba(16,185,129,0.25)',
+                color: '#10b981'
+              }}
+            >
+              <Download className="w-4 h-4" />
+              Export Excel
+            </motion.button>
+          </div>
         </header>
 
         {/* Stats Grid */}
@@ -235,7 +491,7 @@ export default function DashboardPage() {
           {[
             { label: 'Total Income', value: income, icon: TrendingUp, color: 'text-blue-400', tint: 'rgba(59,130,246,0.05)', glow: '0 0 20px rgba(59,130,246,0.3)', accent: '#2563eb' },
             { label: 'Total Expenses', value: expenses, icon: TrendingDown, color: 'text-rose-400', tint: 'rgba(239,68,68,0.05)', glow: '0 0 20px rgba(239,68,68,0.3)', accent: '#ef4444' },
-            { label: 'Net Balance', value: netBalance, icon: Wallet, color: 'text-violet-400', tint: 'rgba(139,92,246,0.05)', glow: '0 0 20px rgba(139,92,246,0.3)', accent: '#7c3aed' },
+            { label: 'Net Savings', value: availableSavings, icon: Wallet, color: 'text-violet-400', tint: 'rgba(139,92,246,0.05)', glow: '0 0 20px rgba(139,92,246,0.3)', accent: '#7c3aed' },
             { label: 'Monthly Budget', value: currentBudgetAmount, icon: AlertCircle, color: 'text-cyan-400', tint: 'rgba(6,182,212,0.05)', glow: '0 0 20px rgba(6,182,212,0.3)', accent: '#06b6d4' },
           ].map((stat, i) => (
             <motion.div
@@ -244,11 +500,7 @@ export default function DashboardPage() {
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: i * 0.1 }}
               className="glass-card p-6 rounded-[24px] card-hover relative overflow-hidden"
-              style={{
-                background: `linear-gradient(${stat.tint}, ${stat.tint}), var(--bg-card)`,
-                border: '1px solid var(--border-card)',
-                boxShadow: 'var(--shadow-card)'
-              }}
+              style={{ background: `linear-gradient(${stat.tint}, ${stat.tint}), var(--bg-card)`, border: '1px solid var(--border-card)', boxShadow: 'var(--shadow-card)' }}
             >
               <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: '3px', background: stat.accent, opacity: 0.6 }} />
               <div className="flex items-center justify-between mb-4">
@@ -264,7 +516,7 @@ export default function DashboardPage() {
 
         {/* Savings Progress & Tip */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-12">
-          <motion.div 
+          <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.4 }}
@@ -272,11 +524,11 @@ export default function DashboardPage() {
             style={{ background: 'var(--bg-card)', border: '1px solid var(--border-card)', boxShadow: 'var(--shadow-card)' }}
           >
             <div className="flex items-center justify-between mb-4">
-              <h3 className="text-lg font-bold">Monthly Savings Rate</h3>
+              <h3 className="text-lg font-bold">Monthly Savings Rate — {getMonthLabel()}</h3>
               <span className="text-violet-400 font-mono font-bold">{savingsRate}%</span>
             </div>
             <div className="apple-progress">
-              <motion.div 
+              <motion.div
                 initial={{ width: 0 }}
                 animate={{ width: `${Math.max(0, Math.min(100, parseFloat(savingsRate)))}%` }}
                 transition={{ duration: 1.5, ease: "easeOut" }}
@@ -288,7 +540,7 @@ export default function DashboardPage() {
             </p>
           </motion.div>
 
-          <motion.div 
+          <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.5 }}
@@ -302,14 +554,12 @@ export default function DashboardPage() {
               <Zap className="w-5 h-5 text-violet-500" />
               VittVantage Tip
             </h3>
-            <p className="leading-relaxed text-sm" style={{ color: 'var(--text-primary)' }}>
-              "{randomTip}"
-            </p>
+            <p className="leading-relaxed text-sm" style={{ color: 'var(--text-primary)' }}>"{randomTip}"</p>
           </motion.div>
         </div>
 
-        {/* Suggestions Section */}
-        <motion.section 
+        {/* Financial Health Suggestions */}
+        <motion.section
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.6 }}
@@ -328,14 +578,13 @@ export default function DashboardPage() {
                   </div>
                   <h4 className="font-bold text-sm">{suggestion.title}</h4>
                 </div>
-                <p className="text-xs leading-relaxed" style={{ color: 'var(--text-secondary)' }}>
-                  {suggestion.desc}
-                </p>
+                <p className="text-xs leading-relaxed" style={{ color: 'var(--text-secondary)' }}>{suggestion.desc}</p>
               </div>
             ))}
           </div>
         </motion.section>
 
+        {/* Investment Suggestions */}
         <motion.section
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -347,13 +596,13 @@ export default function DashboardPage() {
               <TrendingUp className={`${investmentTier.theme.text} w-5 h-5`} />
               Investment Suggestions
             </h2>
-            <div className={`px-4 py-2 rounded-full border ${investmentTier.theme.border} ${investmentTier.theme.bg} flex items-center gap-3`}>
+            <div className={`px-4 py-2 rounded-full border ${investmentTier.theme.border} ${investmentTier.theme.bg}`}>
               <span className={`text-sm font-bold ${investmentTier.theme.text}`}>{investmentTier.name}: {investmentTier.range}</span>
             </div>
           </div>
           <div className="glass-card p-6 rounded-[24px] mb-6" style={{ background: 'var(--bg-card)', border: '1px solid var(--border-card)' }}>
-            <p className="text-sm font-medium mb-1" style={{ color: 'var(--text-secondary)' }}>Current Monthly Net Savings</p>
-            <p className={`text-3xl font-mono font-bold ${investmentTier.theme.text}`}>₹{netBalance.toLocaleString('en-IN', { minimumFractionDigits: 2 })}</p>
+            <p className="text-sm font-medium mb-1" style={{ color: 'var(--text-secondary)' }}>Net Savings for {getMonthLabel()}</p>
+            <p className={`text-3xl font-mono font-bold ${investmentTier.theme.text}`}>₹{availableSavings.toLocaleString('en-IN', { minimumFractionDigits: 2 })}</p>
           </div>
           <AnimatePresence mode="wait">
             <motion.div
@@ -380,9 +629,12 @@ export default function DashboardPage() {
           </AnimatePresence>
         </motion.section>
 
-        <GoalTracker />
-
-        <LiveMarketData savingsTier={savingsTier} />
+        {/* Goals & Market Data */}
+        <div className="flex flex-col gap-12 mb-12">
+          <GoalTracker key={currentMonth} monthlySavings={availableSavings} />
+          <div className="w-full h-px" style={{ background: 'var(--border-card)' }} />
+          <LiveMarketData savingsTier={savingsTier} />
+        </div>
 
         {/* Budget Alert */}
         <AnimatePresence>
@@ -400,19 +652,15 @@ export default function DashboardPage() {
         </AnimatePresence>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          {/* Left Column: Forms & Budget */}
+          {/* Left Column */}
           <div className="lg:col-span-1 space-y-8">
             <section className="glass-card p-8 rounded-[32px]" style={{ background: 'var(--bg-card)', border: '1px solid var(--border-card)' }}>
               <div className="flex items-center justify-between mb-6">
-                <h2 className="text-xl font-bold" style={{ color: 'var(--text-primary)' }}>Manage Budget</h2>
-                <button 
-                  onClick={() => setIsEditingBudget(!isEditingBudget)}
-                  className="p-2 hover:bg-white/5 rounded-xl transition-colors text-violet-500"
-                >
+                <h2 className="text-xl font-bold">Manage Budget</h2>
+                <button onClick={() => setIsEditingBudget(!isEditingBudget)} className="p-2 hover:bg-white/5 rounded-xl transition-colors text-violet-500">
                   <Edit2 className="w-5 h-5" />
                 </button>
               </div>
-              
               {isEditingBudget ? (
                 <div className="space-y-4">
                   <input
@@ -430,7 +678,7 @@ export default function DashboardPage() {
                 </div>
               ) : (
                 <div className="p-4 rounded-2xl" style={{ background: 'var(--bg-card)', border: '1px solid var(--border-card)' }}>
-                  <p className="text-sm mb-1" style={{ color: 'var(--text-secondary)' }}>Current Monthly Limit</p>
+                  <p className="text-sm mb-1" style={{ color: 'var(--text-secondary)' }}>Budget for {getMonthLabel()}</p>
                   <p className="text-2xl font-mono font-bold">₹{currentBudgetAmount.toLocaleString('en-IN')}</p>
                 </div>
               )}
@@ -438,20 +686,23 @@ export default function DashboardPage() {
 
             <section className="glass-card p-8 rounded-[32px]" style={{ background: 'var(--bg-card)', border: '1px solid var(--border-card)' }}>
               <div className="flex p-1 bg-white/5 rounded-2xl mb-6">
-                <button 
+                <button
+                  disabled={isDemo}
                   onClick={() => setActiveTab('expense')}
-                  className={`flex-grow py-2 rounded-xl text-sm font-bold transition-all ${activeTab === 'expense' ? 'bg-violet-600 text-white shadow-lg' : 'text-slate-400 hover:text-white'}`}
+                  title={isDemo ? 'Not available in demo mode' : ''}
+                  className={`flex-grow py-2 rounded-xl text-sm font-bold transition-all ${activeTab === 'expense' ? 'bg-violet-600 text-white shadow-lg' : 'text-slate-400 hover:text-white'} ${isDemo ? 'opacity-50 cursor-not-allowed' : ''}`}
                 >
                   Expense
                 </button>
-                <button 
+                <button
+                  disabled={isDemo}
                   onClick={() => setActiveTab('income')}
-                  className={`flex-grow py-2 rounded-xl text-sm font-bold transition-all ${activeTab === 'income' ? 'bg-blue-600 text-white shadow-lg' : 'text-slate-400 hover:text-white'}`}
+                  title={isDemo ? 'Not available in demo mode' : ''}
+                  className={`flex-grow py-2 rounded-xl text-sm font-bold transition-all ${activeTab === 'income' ? 'bg-blue-600 text-white shadow-lg' : 'text-slate-400 hover:text-white'} ${isDemo ? 'opacity-50 cursor-not-allowed' : ''}`}
                 >
                   Income
                 </button>
               </div>
-              
               <AnimatePresence mode="wait">
                 <motion.div
                   key={activeTab}
@@ -466,27 +717,26 @@ export default function DashboardPage() {
             </section>
           </div>
 
-          {/* Right Column: Charts & History */}
+          {/* Right Column */}
           <div className="lg:col-span-2 space-y-8">
             <section className="glass-card p-8 rounded-[32px]" style={{ background: 'var(--bg-card)', border: '1px solid var(--border-card)' }}>
-              <h2 className="text-xl font-bold mb-8" style={{ color: 'var(--text-primary)' }}>Financial Analytics</h2>
-              <ChartComponent transactions={transactions} />
+              <h2 className="text-xl font-bold mb-8">Financial Analytics — {getMonthLabel()}</h2>
+              <ChartComponent transactions={monthlyTransactions} />
             </section>
 
             <section className="glass-card p-8 rounded-[32px]" style={{ background: 'var(--bg-card)', border: '1px solid var(--border-card)' }}>
               <div className="flex items-center justify-between mb-8">
-                <h2 className="text-xl font-bold" style={{ color: 'var(--text-primary)' }}>Recent Transactions</h2>
-                <button className="text-sm font-bold text-indigo-500 hover:text-indigo-400 transition-colors">View All</button>
+                <h2 className="text-xl font-bold">Transactions — {getMonthLabel()}</h2>
+                <span className="text-sm font-medium" style={{ color: 'var(--text-secondary)' }}>{monthlyTransactions.length} total</span>
               </div>
-              
               <div className="space-y-4">
-                {transactions.length === 0 ? (
-                  <div className="text-center py-12 text-slate-500">
+                {monthlyTransactions.length === 0 ? (
+                  <div className="text-center py-12" style={{ color: 'var(--text-secondary)' }}>
                     <Wallet className="w-12 h-12 mx-auto mb-4 opacity-20" />
-                    <p>No transactions yet. Start by adding one!</p>
+                    <p>No transactions for {getMonthLabel()}.</p>
                   </div>
                 ) : (
-                  transactions.slice().reverse().map((t) => (
+                  monthlyTransactions.slice().reverse().map((t) => (
                     <motion.div
                       layout
                       initial={{ opacity: 0, x: -20 }}
@@ -496,7 +746,10 @@ export default function DashboardPage() {
                       style={{ background: 'rgba(255,255,255,0.03)' }}
                     >
                       <div className="flex items-center gap-4">
-                        <div className={`w-12 h-12 rounded-[14px] flex items-center justify-center ${t.type === 'income' ? 'bg-emerald-500/10 text-emerald-400' : 'bg-rose-500/10 text-rose-400'}`} style={{ boxShadow: t.type === 'income' ? '0 0 12px rgba(16,185,129,0.25)' : '0 0 12px rgba(244,63,94,0.25)' }}>
+                        <div
+                          className={`w-12 h-12 rounded-[14px] flex items-center justify-center ${t.type === 'income' ? 'bg-emerald-500/10 text-emerald-400' : 'bg-rose-500/10 text-rose-400'}`}
+                          style={{ boxShadow: t.type === 'income' ? '0 0 12px rgba(16,185,129,0.25)' : '0 0 12px rgba(244,63,94,0.25)' }}
+                        >
                           {t.type === 'income' ? <Plus className="w-6 h-6" /> : <Minus className="w-6 h-6" />}
                         </div>
                         <div>
@@ -508,7 +761,7 @@ export default function DashboardPage() {
                         <p className={`font-mono font-bold text-lg ${t.type === 'income' ? 'text-emerald-500' : 'text-rose-500'}`}>
                           {t.type === 'income' ? '+' : '-'}₹{t.amount.toLocaleString('en-IN')}
                         </p>
-                        <button 
+                        <button
                           onClick={() => deleteTransaction(t.id)}
                           className="opacity-0 group-hover:opacity-100 p-2 text-slate-500 hover:text-rose-500 transition-all"
                         >
@@ -523,6 +776,7 @@ export default function DashboardPage() {
           </div>
         </div>
       </main>
+      <ChatBot />
     </div>
   );
 }

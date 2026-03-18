@@ -1,6 +1,6 @@
-import { createContext, useContext, useEffect, useMemo, useState, ReactNode } from 'react';
+import { createContext, useContext, useLayoutEffect, useMemo, useState, ReactNode } from 'react';
 
-type Theme = 'dark' | 'light' | 'glass';
+type Theme = 'dark' | 'light';
 
 interface ThemeContextType {
   theme: Theme;
@@ -15,8 +15,13 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
     return saved || 'dark';
   });
 
-  useEffect(() => {
-    document.documentElement.setAttribute('data-theme', theme);
+  useLayoutEffect(() => {
+    const root = document.documentElement;
+    if (theme === 'light') {
+      root.classList.add('light');
+    } else {
+      root.classList.remove('light');
+    }
     localStorage.setItem('vittvantage_theme', theme);
   }, [theme]);
 

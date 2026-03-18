@@ -272,125 +272,90 @@ export default function DashboardPage() {
     <div className="min-h-screen">
       <Navbar />
 
-      {/* Welcome Banner */}
-      <AnimatePresence>
-        {showWelcome && (
-          <motion.div
-            initial={{ opacity: 0, y: -40 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -40 }}
-            transition={{ type: 'spring', stiffness: 300, damping: 25 }}
-            className="relative overflow-hidden"
-            style={{
-              background: 'linear-gradient(135deg, rgba(124,58,237,0.18), rgba(37,99,235,0.12))',
-              borderBottom: '1px solid rgba(139,92,246,0.25)',
-              backdropFilter: 'blur(12px)',
-            }}
-          >
-            {/* Glow orb */}
-            <div
-              className="absolute -top-10 left-1/2 -translate-x-1/2 w-[600px] h-[100px] rounded-full pointer-events-none"
-              style={{ background: 'rgba(139,92,246,0.15)', filter: 'blur(40px)' }}
-            />
-
-            <div className="max-w-7xl mx-auto px-6 py-5 flex items-center justify-between gap-4 relative z-10">
-              <div className="flex items-center gap-5">
-
-                {/* Avatar */}
-                <div
-                  className="w-12 h-12 rounded-2xl flex items-center justify-center flex-shrink-0 text-xl font-bold text-white shadow-lg"
-                  style={{
-                    background: 'linear-gradient(135deg, #7c3aed, #2563eb)',
-                    boxShadow: '0 0 20px rgba(124,58,237,0.4)'
-                  }}
-                >
-                  {displayUser.username.charAt(0).toUpperCase()}
-                </div>
-
-                <div>
-                  {/* Greeting */}
-                  <div className="flex items-center gap-2 mb-0.5 flex-wrap">
-                    <span className="text-base font-extrabold tracking-tight" style={{ color: 'var(--text-primary)' }}>
-                      {getGreeting()},
-                    </span>
-                    <span
-                      className="text-base font-extrabold tracking-tight"
-                      style={{
-                        background: 'linear-gradient(135deg, #a78bfa, #60a5fa)',
-                        WebkitBackgroundClip: 'text',
-                        WebkitTextFillColor: 'transparent',
-                      }}
-                    >
-                      {displayUser.username}!
-                    </span>
-                    <span className="text-base">👋</span>
-                  </div>
-
-                  {/* Pills */}
-                  <div className="flex items-center gap-2 flex-wrap">
-                    <p className="text-xs font-medium" style={{ color: 'var(--text-secondary)' }}>
-                      Ready to track your finances today?
-                    </p>
-                    <span
-                      className="text-xs font-bold px-2 py-0.5 rounded-full"
-                      style={{
-                        background: 'rgba(16,185,129,0.15)',
-                        color: '#10b981',
-                        border: '1px solid rgba(16,185,129,0.2)'
-                      }}
-                    >
-                      ₹{availableSavings.toLocaleString('en-IN')} saved
-                    </span>
-                    <span
-                      className="text-xs font-bold px-2 py-0.5 rounded-full"
-                      style={{
-                        background: 'rgba(139,92,246,0.15)',
-                        color: '#a78bfa',
-                        border: '1px solid rgba(139,92,246,0.2)'
-                      }}
-                    >
-                      {monthlyTransactions.length} transactions
-                    </span>
-                  </div>
-                </div>
-              </div>
-
-              {/* Right side */}
-              <div className="flex items-center gap-3 flex-shrink-0">
-                <Link
-                  to="/analytics"
-                  className="hidden sm:flex items-center gap-2 px-4 py-2 text-xs font-bold rounded-xl transition-all hover:scale-105"
-                  style={{
-                    background: 'rgba(139,92,246,0.15)',
-                    border: '1px solid rgba(139,92,246,0.25)',
-                    color: '#a78bfa'
-                  }}
-                >
-                  View Analytics →
-                </Link>
-                <button
-                  onClick={() => setShowWelcome(false)}
-                  className="p-2 rounded-xl transition-all hover:bg-white/10 hover:scale-110"
-                  style={{ color: 'var(--text-secondary)' }}
-                >
-                  <X className="w-4 h-4" />
-                </button>
-              </div>
-            </div>
-
-            {/* Auto-dismiss progress bar */}
-            <motion.div
-              initial={{ width: '100%' }}
-              animate={{ width: '0%' }}
-              transition={{ duration: 4, ease: 'linear' }}
-              className="absolute bottom-0 left-0 h-[2px]"
-              style={{ background: 'linear-gradient(90deg, #7c3aed, #60a5fa, #a78bfa)' }}
-            />
-          </motion.div>
-        )}
-      </AnimatePresence>
-
       <main className="max-w-7xl mx-auto px-6 py-10">
+
+        {/* Welcome Banner */}
+        <AnimatePresence>
+          {showWelcome && (
+            <motion.div
+              initial={{ height: 0, opacity: 0 }}
+              animate={{ height: 'auto', opacity: 1 }}
+              exit={{ height: 0, opacity: 0 }}
+              className="relative overflow-hidden mb-6"
+              style={{
+                background: 'rgba(139,92,246,0.08)',
+                border: '1px solid rgba(139,92,246,0.2)',
+                borderRadius: '1.5rem'
+              }}
+            >
+              <div className="max-w-7xl mx-auto px-6 py-5 flex items-center justify-between gap-4 relative z-10">
+                <div className="flex items-center gap-5">
+                  <div
+                    className="w-12 h-12 rounded-2xl flex items-center justify-center flex-shrink-0 text-xl font-bold text-white shadow-lg"
+                    style={{
+                      background: 'linear-gradient(135deg, #7c3aed, #2563eb)',
+                    }}
+                  >
+                    {displayUser.username.charAt(0).toUpperCase()}
+                  </div>
+
+                  <div>
+                    <div className="flex items-center gap-2 mb-0.5 flex-wrap">
+                      <span className="text-base font-extrabold tracking-tight" style={{ color: 'var(--text-primary)' }}>
+                        {getGreeting()},
+                      </span>
+                      <span
+                        className="text-base font-extrabold tracking-tight"
+                        style={{
+                          background: 'linear-gradient(135deg, #a78bfa, #60a5fa)',
+                          WebkitBackgroundClip: 'text',
+                          WebkitTextFillColor: 'transparent',
+                        }}
+                      >
+                        {displayUser.username}!
+                      </span>
+                      <span className="text-base">👋</span>
+                    </div>
+
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <p className="text-xs font-medium" style={{ color: 'var(--text-secondary)' }}>
+                        Ready to track your finances today?
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-3 flex-shrink-0">
+                  <Link
+                    to="/analytics"
+                    className="hidden sm:flex items-center gap-2 px-4 py-2 text-xs font-bold rounded-xl transition-all hover:scale-105"
+                    style={{
+                      background: 'rgba(139,92,246,0.15)',
+                      border: '1px solid rgba(139,92,246,0.25)',
+                      color: '#a78bfa'
+                    }}
+                  >
+                    View Analytics →
+                  </Link>
+                  <button
+                    onClick={() => setShowWelcome(false)}
+                    className="p-2 rounded-xl transition-all hover:bg-white/10 hover:scale-110"
+                    style={{ color: 'var(--text-secondary)' }}
+                  >
+                    <X className="w-4 h-4" />
+                  </button>
+                </div>
+              </div>
+
+              <motion.div
+                initial={{ width: '100%' }}
+                animate={{ width: '0%' }}
+                transition={{ duration: 4, ease: 'linear' }}
+                className="absolute bottom-0 left-0 h-[2px] bg-violet-500"
+              />
+            </motion.div>
+          )}
+        </AnimatePresence>
 
         {/* Demo Banner */}
         {isDemo && (
@@ -489,22 +454,21 @@ export default function DashboardPage() {
         {/* Stats Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
           {[
-            { label: 'Total Income', value: income, icon: TrendingUp, color: 'text-blue-400', tint: 'rgba(59,130,246,0.05)', glow: '0 0 20px rgba(59,130,246,0.3)', accent: '#2563eb' },
-            { label: 'Total Expenses', value: expenses, icon: TrendingDown, color: 'text-rose-400', tint: 'rgba(239,68,68,0.05)', glow: '0 0 20px rgba(239,68,68,0.3)', accent: '#ef4444' },
-            { label: 'Net Savings', value: availableSavings, icon: Wallet, color: 'text-violet-400', tint: 'rgba(139,92,246,0.05)', glow: '0 0 20px rgba(139,92,246,0.3)', accent: '#7c3aed' },
-            { label: 'Monthly Budget', value: currentBudgetAmount, icon: AlertCircle, color: 'text-cyan-400', tint: 'rgba(6,182,212,0.05)', glow: '0 0 20px rgba(6,182,212,0.3)', accent: '#06b6d4' },
+            { label: 'Total Income', value: income, icon: TrendingUp, color: 'text-blue-400' },
+            { label: 'Total Expenses', value: expenses, icon: TrendingDown, color: 'text-rose-400' },
+            { label: 'Net Savings', value: availableSavings, icon: Wallet, color: 'text-violet-400' },
+            { label: 'Monthly Budget', value: currentBudgetAmount, icon: AlertCircle, color: 'text-cyan-400' },
           ].map((stat, i) => (
             <motion.div
               key={stat.label}
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: i * 0.1 }}
-              className="glass-card p-6 rounded-[24px] card-hover relative overflow-hidden"
-              style={{ background: `linear-gradient(${stat.tint}, ${stat.tint}), var(--bg-card)`, border: '1px solid var(--border-card)', boxShadow: 'var(--shadow-card)' }}
+              className="glass-card p-6 rounded-[24px] card-hover"
+              style={{ background: 'var(--bg-card)', border: '1px solid var(--border-card)' }}
             >
-              <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: '3px', background: stat.accent, opacity: 0.6 }} />
               <div className="flex items-center justify-between mb-4">
-                <div className="w-10 h-10 rounded-xl flex items-center justify-center" style={{ boxShadow: stat.glow, background: 'rgba(255,255,255,0.06)' }}>
+                <div className="w-10 h-10 rounded-xl flex items-center justify-center bg-white/5">
                   <stat.icon className={`w-5 h-5 ${stat.color}`} />
                 </div>
               </div>
@@ -521,18 +485,18 @@ export default function DashboardPage() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.4 }}
             className="lg:col-span-2 glass-card p-8 rounded-[24px] flex flex-col justify-center"
-            style={{ background: 'var(--bg-card)', border: '1px solid var(--border-card)', boxShadow: 'var(--shadow-card)' }}
+            style={{ background: 'var(--bg-card)', border: '1px solid var(--border-card)' }}
           >
             <div className="flex items-center justify-between mb-4">
               <h3 className="text-lg font-bold">Monthly Savings Rate — {getMonthLabel()}</h3>
               <span className="text-violet-400 font-mono font-bold">{savingsRate}%</span>
             </div>
-            <div className="apple-progress">
+            <div className="w-full bg-white/5 rounded-full h-2 overflow-hidden">
               <motion.div
+                className="bg-violet-500 h-full rounded-full"
                 initial={{ width: 0 }}
                 animate={{ width: `${Math.max(0, Math.min(100, parseFloat(savingsRate)))}%` }}
-                transition={{ duration: 1.5, ease: "easeOut" }}
-                className="apple-progress-fill"
+                transition={{ duration: 1.5, ease: 'easeOut' }}
               />
             </div>
             <p className="text-xs mt-4 italic" style={{ color: 'var(--text-secondary)' }}>

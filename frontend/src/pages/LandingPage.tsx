@@ -107,21 +107,8 @@ export default function LandingPage() {
     <div className="min-h-screen overflow-x-hidden bg-slate-950">
       {/* Background Orbs */}
       <div className="fixed inset-0 pointer-events-none z-0">
-        <motion.div
-          animate={{ y: [0, -30, 0], x: [0, 15, 0] }}
-          transition={{ duration: 20, repeat: Infinity, ease: 'easeInOut' }}
-          className="absolute top-[-10%] left-[-10%] w-[600px] h-[600px] bg-violet-600/20 rounded-full blur-[160px]"
-        />
-        <motion.div
-          animate={{ y: [0, 30, 0], x: [0, -20, 0] }}
-          transition={{ duration: 25, repeat: Infinity, ease: 'easeInOut' }}
-          className="absolute bottom-[-10%] right-[-10%] w-[500px] h-[500px] bg-blue-600/15 rounded-full blur-[140px]"
-        />
-        <motion.div
-          animate={{ y: [0, -40, 0], x: [0, 25, 0] }}
-          transition={{ duration: 18, repeat: Infinity, ease: 'easeInOut' }}
-          className="absolute top-[30%] right-[-5%] w-[300px] h-[300px] bg-pink-600/10 rounded-full blur-[120px]"
-        />
+        <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-violet-500/10 rounded-full blur-[120px]" />
+        <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-blue-500/5 rounded-full blur-[120px]" />
       </div>
 
       <nav className="relative z-50 flex items-center justify-between px-8 py-6 max-w-7xl mx-auto">

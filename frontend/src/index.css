@@ -15,8 +15,6 @@
   --text-secondary: #94a3b8;
   --bg-input: rgba(255, 255, 255, 0.05);
   --border-input: rgba(255, 255, 255, 0.10);
-  --shadow-card: none;
-  --backdrop-blur: none;
   --navbar-bg: rgba(2, 6, 23, 0.8);
 }
 
@@ -29,8 +27,6 @@
   --text-secondary: #64748b;
   --bg-input: #f8fafc;
   --border-input: #cbd5e1;
-  --shadow-card: 0 2px 12px rgba(0, 0, 0, 0.06);
-  --backdrop-blur: none;
   --navbar-bg: rgba(255, 255, 255, 0.9);
 }
 
@@ -41,33 +37,16 @@ body {
   -webkit-font-smoothing: antialiased;
 }
 
-.light .title-gradient {
-  color: var(--text-primary);
-}
-
 .card-hover {
-  transition: all 0.5s cubic-bezier(0.23, 1, 0.32, 1);
-  position: relative;
-  z-index: 1;
+  transition: transform 300ms cubic-bezier(0.4, 0, 0.2, 1), border-color 300ms cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-.card-hover:hover {
-  transform: translateY(-8px) scale(1.02);
-  border-color: rgba(139, 92, 246, 0.4);
-  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5),
-              0 0 20px rgba(139, 92, 246, 0.1);
-  z-index: 10;
-}
-
-.accent-glow {
-  box-shadow: 0 0 25px rgba(139, 92, 246, 0.2);
-}
-
-/* Card hover animation (subtle float) */
-.card-hover {
-  transition: transform 300ms cubic-bezier(0.4, 0, 0.2, 1), border-color 300ms cubic-bezier(0.4, 0, 0.2, 1), box-shadow 300ms cubic-bezier(0.4, 0, 0.2, 1);
-}
 .card-hover:hover {
   transform: translateY(-2px);
+  border-color: rgba(139, 92, 246, 0.4);
 }
-/* removed old bg-orb legacy */
+
+.glass-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border-card);
+}

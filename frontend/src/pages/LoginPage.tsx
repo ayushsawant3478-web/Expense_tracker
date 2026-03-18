@@ -64,7 +64,7 @@ export default function LoginPage() {
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        className="max-w-md w-full glass-card p-10 rounded-[32px] shadow-2xl"
+        className="max-w-md w-full p-10 rounded-[32px] shadow-2xl"
         style={{ background: 'var(--bg-card)', border: '1px solid var(--border-card)' }}
       >
         <div className="flex flex-col items-center mb-8">

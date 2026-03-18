@@ -111,8 +111,6 @@ export default function Navbar() {
         style={{
           background: 'var(--navbar-bg)',
           borderBottom: '1px solid var(--border-card)',
-          backdropFilter: 'blur(20px)',
-          WebkitBackdropFilter: 'blur(20px)',
         }}
       >
         <div className="max-w-7xl mx-auto px-6 py-3 flex justify-between items-center">

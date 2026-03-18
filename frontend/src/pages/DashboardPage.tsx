@@ -20,6 +20,8 @@ export default function DashboardPage() {
   const { transactions, budgets, getMonthlySummary, addBudget, deleteTransaction } = useExpense();
   const navigate = useNavigate();
 
+  const displayUser = user || { username: isDemo ? 'Demo User' : 'User', email: '', id: 'guest' };
+
   const [showWelcome, setShowWelcome] = useState(false);
 
   // Show banner when user loads
@@ -265,8 +267,10 @@ export default function DashboardPage() {
   }
 
   if (!user && !isDemo) return null;
+  if (!displayUser?.username) return null;
 
-  const displayUser = user || { username: 'Demo User', email: 'demo@vittvantage.com', id: 'demo' };
+  const safeUsername = displayUser?.username || 'User';
+  const safeInitial = safeUsername.charAt(0).toUpperCase();
 
   return (
     <div className="min-h-screen">
@@ -296,7 +300,7 @@ export default function DashboardPage() {
                       background: 'linear-gradient(135deg, #7c3aed, #2563eb)',
                     }}
                   >
-                    {displayUser.username.charAt(0).toUpperCase()}
+                    {safeInitial}
                   </div>
 
                   <div>
@@ -312,7 +316,7 @@ export default function DashboardPage() {
                           WebkitTextFillColor: 'transparent',
                         }}
                       >
-                        {displayUser.username}!
+                        {safeUsername}!
                       </span>
                       <span className="text-base">👋</span>
                     </div>
@@ -395,7 +399,7 @@ export default function DashboardPage() {
             <p style={{ color: 'var(--text-secondary)' }}>
               Welcome back,{' '}
               <span className="font-semibold" style={{ color: 'var(--text-primary)' }}>
-                {displayUser.username}
+                {safeUsername}
               </span>
               . Here's your status for{' '}
               <span className="font-semibold text-violet-400">{getMonthLabel()}</span>.

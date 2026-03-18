@@ -18,12 +18,20 @@ const demoUser = { id: 'demo', username: 'Demo User', email: 'demo@vittvantage.c
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(() => {
-    const saved = localStorage.getItem('vittvantage_user');
-    return saved ? JSON.parse(saved) : null;
+    try {
+      const saved = localStorage.getItem('vittvantage_user');
+      return saved ? JSON.parse(saved) : null;
+    } catch {
+      return null;
+    }
   });
 
   const [token, setToken] = useState<string | null>(() => {
-    return localStorage.getItem('vittvantage_token');
+    try {
+      return localStorage.getItem('vittvantage_token');
+    } catch {
+      return null;
+    }
   });
 
   const [isDemo, setIsDemo] = useState(false);

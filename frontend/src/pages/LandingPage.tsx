@@ -1,10 +1,11 @@
-import { motion, AnimatePresence } from 'motion/react';
-import { useState, useEffect } from 'react';
+import { motion, AnimatePresence, useMotionValue, useTransform, useSpring } from 'motion/react';
+import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Wallet, ArrowRight, Zap, PieChart, ShieldCheck, Menu, X } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { useExpense } from '../context/ExpenseContext';
 import { useGoal } from '../context/GoalContext';
+import StarfieldBackground from '../components/StarfieldBackground';
 
 function useTypewriter(phrases: string[], typingSpeed = 100, erasingSpeed = 60, pauseTime = 2500) {
   const [displayText, setDisplayText] = useState('');
@@ -59,6 +60,24 @@ export default function LandingPage() {
   const navigate = useNavigate();
   const [menuOpen, setMenuOpen] = useState(false);
 
+  // 3D card tilt
+  const cardX = useMotionValue(0);
+  const cardY = useMotionValue(0);
+  const springCfg = { stiffness: 200, damping: 28 };
+  const rotateX = useSpring(useTransform(cardY, [-200, 200], [14, -14]), springCfg);
+  const rotateY = useSpring(useTransform(cardX, [-200, 200], [-14, 14]), springCfg);
+
+  const onCardMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
+    const rect = e.currentTarget.getBoundingClientRect();
+    cardX.set(e.clientX - rect.left - rect.width / 2);
+    cardY.set(e.clientY - rect.top - rect.height / 2);
+  };
+
+  const onCardMouseLeave = () => {
+    cardX.set(0);
+    cardY.set(0);
+  };
+
   const phrases = [
     'Master your wealth with precision.',
     'Track every rupee effortlessly.',
@@ -105,13 +124,14 @@ export default function LandingPage() {
 
   return (
     <div className="min-h-screen overflow-x-hidden bg-slate-950">
+      <StarfieldBackground />
       {/* Background Orbs */}
       <div className="fixed inset-0 pointer-events-none z-0">
         <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-violet-500/10 rounded-full blur-[120px]" />
         <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-blue-500/5 rounded-full blur-[120px]" />
       </div>
 
-      <nav className="relative z-50 flex items-center justify-between px-8 py-6 max-w-7xl mx-auto">
+      <nav className="relative z-50 flex items-center justify-between px-4 sm:px-8 py-5 sm:py-6 max-w-7xl mx-auto">
         <div className="flex items-center gap-2">
           <div className="w-10 h-10 bg-violet-600 rounded-xl flex items-center justify-center shadow-lg shadow-violet-500/20">
             <Wallet className="w-6 h-6 text-white" />
@@ -169,15 +189,15 @@ export default function LandingPage() {
         )}
       </AnimatePresence>
 
-      <main className="relative z-10 max-w-7xl mx-auto px-8 pt-20 pb-32">
-        <div className="grid lg:grid-cols-2 gap-16 items-center">
+      <main className="relative z-10 max-w-7xl mx-auto px-4 sm:px-8 pt-10 sm:pt-16 lg:pt-20 pb-16 sm:pb-24 lg:pb-32">
+        <div className="grid lg:grid-cols-2 gap-8 lg:gap-16 items-center">
           <motion.div
             initial={{ opacity: 0, y: 40 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true, amount: 0.2 }}
             transition={{ duration: 0.6, ease: 'easeOut' }}
           >
-            <h1 className="text-6xl lg:text-7xl font-bold leading-[1.1] tracking-tight mb-8 text-white min-h-[120px] lg:min-h-[160px]">
+            <h1 className="text-4xl sm:text-5xl lg:text-7xl font-bold leading-[1.1] tracking-tight mb-6 sm:mb-8 text-white min-h-[72px] sm:min-h-[110px] lg:min-h-[160px]">
               <span style={{ color: 'var(--text-primary)' }}>
                 {renderTypedText()}
               </span>
@@ -185,17 +205,17 @@ export default function LandingPage() {
                 <span className="text-violet-500 animate-pulse ml-1">|</span>
               )}
             </h1>
-            <p className="text-xl mb-10 max-w-lg leading-relaxed text-slate-400">
+            <p className="text-base sm:text-xl mb-8 sm:mb-10 max-w-lg leading-relaxed text-slate-400">
               Track every rupee, set smart budgets, and visualize your financial journey with our premium space-themed manager.
             </p>
-            <div className="flex flex-wrap gap-4">
-              <Link to="/register" className="group px-8 py-4 bg-violet-600 font-bold rounded-2xl hover:bg-violet-500 transition-all flex items-center gap-2 shadow-xl shadow-violet-500/20 text-white">
+            <div className="flex flex-col sm:flex-row flex-wrap gap-4">
+              <Link to="/register" className="group px-8 py-4 bg-violet-600 font-bold rounded-2xl hover:bg-violet-500 transition-all flex items-center justify-center gap-2 shadow-xl shadow-violet-500/20 text-white w-full sm:w-auto">
                 Start Tracking Now
                 <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
               </Link>
               <button 
                 onClick={handleViewDemo}
-                className="px-8 py-4 font-bold rounded-2xl transition-all bg-white/5 border border-white/10 text-white hover:bg-white/10"
+                className="px-8 py-4 font-bold rounded-2xl transition-all bg-white/5 border border-white/10 text-white hover:bg-white/10 w-full sm:w-auto"
               >
                 View Demo
               </button>
@@ -207,67 +227,82 @@ export default function LandingPage() {
             whileInView={{ opacity: 1, scale: 1 }}
             viewport={{ once: true, amount: 0.2 }}
             transition={{ duration: 0.8, delay: 0.2 }}
-            className="relative"
+            className="relative mt-6 lg:mt-0 mx-2 sm:mx-0"
           >
-            <div className="relative z-10 glass-card rounded-[32px] p-8 shadow-2xl overflow-hidden bg-white/[0.03] border border-white/10 backdrop-blur-xl">
-              <div className="flex items-center justify-between mb-8">
-                <div>
-                  <p className="text-sm uppercase tracking-widest font-bold mb-1 text-slate-400">Total Balance</p>
-                  <p className="text-4xl font-mono font-bold text-white">₹45,250.00</p>
-                </div>
-                <div className="w-12 h-12 bg-violet-600/20 rounded-full flex items-center justify-center">
-                  <Zap className="text-violet-500 w-6 h-6" />
-                </div>
-              </div>
-              
-              <div className="space-y-4">
-                {[
-                  { label: 'Rent & Utilities', amount: '₹12,000', color: 'bg-violet-600' },
-                  { label: 'Groceries', amount: '₹4,500', color: 'bg-blue-500' },
-                  { label: 'Entertainment', amount: '₹2,200', color: 'bg-blue-400' },
-                ].map((item, idx) => (
-                  <div key={idx} className="p-4 rounded-2xl flex items-center justify-between bg-white/[0.03] border border-white/5">
-                    <div className="flex items-center gap-3">
-                      <div className={`w-2 h-8 ${item.color} rounded-full`} />
-                      <span className="font-medium text-white">{item.label}</span>
+            {/* Perspective wrapper — enables 3D tilt on mouse move */}
+            <div
+              style={{ perspective: '1200px' }}
+              onMouseMove={onCardMouseMove}
+              onMouseLeave={onCardMouseLeave}
+              className="relative"
+            >
+              <motion.div
+                style={{ rotateX, rotateY, transformStyle: 'preserve-3d' }}
+                className="relative"
+              >
+                <div className="relative z-10 glass-card rounded-[32px] p-8 shadow-2xl overflow-hidden bg-white/[0.03] border border-white/10 backdrop-blur-xl">
+                  <div className="flex items-center justify-between mb-8">
+                    <div>
+                      <p className="text-sm uppercase tracking-widest font-bold mb-1 text-slate-400">Total Balance</p>
+                      <p className="text-4xl font-mono font-bold text-white">₹45,250.00</p>
                     </div>
-                    <span className="font-mono font-bold text-white">{item.amount}</span>
+                    <div className="w-12 h-12 bg-violet-600/20 rounded-full flex items-center justify-center">
+                      <Zap className="text-violet-500 w-6 h-6" />
+                    </div>
                   </div>
-                ))}
-              </div>
-            </div>
 
-            {/* Floating elements */}
-            <motion.div
-              animate={{ y: [0, -10, 0] }}
-              transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
-              className="absolute -top-6 -right-6 z-20 glass-card p-4 rounded-2xl shadow-xl bg-white/[0.05] border border-white/10 backdrop-blur-xl"
-            >
-              <PieChart className="text-violet-500 w-8 h-8" />
-            </motion.div>
-            <motion.div
-              animate={{ y: [0, 10, 0] }}
-              transition={{ duration: 5, repeat: Infinity, ease: "easeInOut", delay: 1 }}
-              className="absolute -bottom-6 -left-6 z-20 glass-card p-4 rounded-2xl shadow-xl bg-white/[0.05] border border-white/10 backdrop-blur-xl"
-            >
-              <ShieldCheck className="text-blue-400 w-8 h-8" />
-            </motion.div>
+                  <div className="space-y-4">
+                    {[
+                      { label: 'Rent & Utilities', amount: '₹12,000', color: 'bg-violet-600' },
+                      { label: 'Groceries', amount: '₹4,500', color: 'bg-blue-500' },
+                      { label: 'Entertainment', amount: '₹2,200', color: 'bg-blue-400' },
+                    ].map((item, idx) => (
+                      <div key={idx} className="p-4 rounded-2xl flex items-center justify-between bg-white/[0.03] border border-white/5">
+                        <div className="flex items-center gap-3">
+                          <div className={`w-2 h-8 ${item.color} rounded-full`} />
+                          <span className="font-medium text-white">{item.label}</span>
+                        </div>
+                        <span className="font-mono font-bold text-white">{item.amount}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Floating badges — translateZ makes them pop above the card face in 3D */}
+                <motion.div
+                  style={{ translateZ: 50 }}
+                  animate={{ y: [0, -10, 0] }}
+                  transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
+                  className="absolute -top-6 -right-6 z-20 glass-card p-4 rounded-2xl shadow-xl bg-white/[0.05] border border-white/10 backdrop-blur-xl"
+                >
+                  <PieChart className="text-violet-500 w-8 h-8" />
+                </motion.div>
+                <motion.div
+                  style={{ translateZ: 50 }}
+                  animate={{ y: [0, 10, 0] }}
+                  transition={{ duration: 5, repeat: Infinity, ease: "easeInOut", delay: 1 }}
+                  className="absolute -bottom-6 -left-6 z-20 glass-card p-4 rounded-2xl shadow-xl bg-white/[0.05] border border-white/10 backdrop-blur-xl"
+                >
+                  <ShieldCheck className="text-blue-400 w-8 h-8" />
+                </motion.div>
+              </motion.div>
+            </div>
           </motion.div>
         </div>
       </main>
 
-      <section className="max-w-7xl mx-auto px-8 py-32 border-t border-white/10">
+      <section className="relative z-10 max-w-7xl mx-auto px-4 sm:px-8 py-16 md:py-32 border-t border-white/10">
         <motion.div 
           initial={{ opacity: 0, y: 40 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, amount: 0.2 }}
           transition={{ duration: 0.6, ease: 'easeOut' }}
-          className="text-center mb-20"
+          className="text-center mb-12 sm:mb-20"
         >
-          <h2 className="text-4xl font-bold mb-4 text-white">Why Choose VittVantage?</h2>
+          <h2 className="text-3xl sm:text-4xl font-bold mb-4 text-white">Why Choose VittVantage?</h2>
           <p className="text-slate-400 max-w-2xl mx-auto">Everything you need to manage your money like a pro, all in one beautiful place.</p>
         </motion.div>
-        <div className="grid md:grid-cols-3 gap-12">
+        <div className="grid md:grid-cols-3 gap-8 md:gap-12">
           {[
             {
               icon: Zap,
@@ -310,18 +345,18 @@ export default function LandingPage() {
       </section>
 
       {/* How It Works Section */}
-      <section className="max-w-7xl mx-auto px-8 py-32 border-t border-white/10">
+      <section className="relative z-10 max-w-7xl mx-auto px-4 sm:px-8 py-16 md:py-32 border-t border-white/10">
         <motion.div
           initial={{ opacity: 0, y: 40 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, amount: 0.2 }}
           transition={{ duration: 0.6, ease: 'easeOut' }}
-          className="text-center mb-20"
+          className="text-center mb-12 sm:mb-20"
         >
-          <h2 className="text-4xl font-bold mb-4 text-white">How It Works</h2>
+          <h2 className="text-3xl sm:text-4xl font-bold mb-4 text-white">How It Works</h2>
           <p className="text-slate-400 max-w-2xl mx-auto">Three simple steps to financial freedom.</p>
         </motion.div>
-        <div className="grid md:grid-cols-3 gap-12">
+        <div className="grid md:grid-cols-3 gap-8 md:gap-12">
           {[
             { step: "01", title: "Sign Up", desc: "Create your account in seconds and start your journey." },
             { step: "02", title: "Log Expenses", desc: "Quickly enter your daily transactions and income." },
@@ -344,15 +379,15 @@ export default function LandingPage() {
       </section>
 
       {/* Testimonials Section */}
-      <section className="max-w-7xl mx-auto px-8 py-32 border-t border-white/10">
+      <section className="relative z-10 max-w-7xl mx-auto px-4 sm:px-8 py-16 md:py-32 border-t border-white/10">
         <motion.div
           initial={{ opacity: 0, y: 40 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, amount: 0.2 }}
           transition={{ duration: 0.6, ease: 'easeOut' }}
-          className="text-center mb-20"
+          className="text-center mb-12 sm:mb-20"
         >
-          <h2 className="text-4xl font-bold mb-4 text-white">Loved by Users</h2>
+          <h2 className="text-3xl sm:text-4xl font-bold mb-4 text-white">Loved by Users</h2>
           <p className="text-slate-400 max-w-2xl mx-auto">Join thousands who have transformed their relationship with money.</p>
         </motion.div>
         <div className="grid md:grid-cols-3 gap-8">
@@ -380,24 +415,24 @@ export default function LandingPage() {
       </section>
 
       {/* Bottom CTA Section */}
-      <section className="relative py-32 border-t border-b border-white/10 overflow-hidden">
+      <section className="relative z-10 py-16 md:py-32 border-t border-b border-white/10 overflow-hidden">
         <div className="absolute inset-0 z-0 opacity-30" style={{ background: 'linear-gradient(135deg, rgba(124,58,237,0.1), rgba(37,99,235,0.05))' }} />
-        <div className="max-w-4xl mx-auto px-8 relative z-10 text-center">
+        <div className="max-w-4xl mx-auto px-4 sm:px-8 relative z-10 text-center">
           <motion.div
             initial={{ opacity: 0, y: 40 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true, amount: 0.2 }}
             transition={{ duration: 0.6, ease: 'easeOut' }}
           >
-            <h2 className="text-5xl font-bold mb-6 text-white leading-tight">Ready to take control of your finances?</h2>
-            <p className="text-xl text-slate-400 mb-12">Join thousands of users managing their wealth smarter with VittVantage. Free forever.</p>
-            <div className="flex flex-wrap justify-center gap-6">
-              <Link to="/register" className="px-10 py-5 bg-violet-600 text-white font-bold rounded-2xl hover:bg-violet-500 transition-all shadow-xl shadow-violet-500/25">
+            <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold mb-4 sm:mb-6 text-white leading-tight">Ready to take control of your finances?</h2>
+            <p className="text-base sm:text-xl text-slate-400 mb-8 sm:mb-12">Join thousands of users managing their wealth smarter with VittVantage. Free forever.</p>
+            <div className="flex flex-col sm:flex-row flex-wrap justify-center gap-4 sm:gap-6">
+              <Link to="/register" className="px-10 py-4 sm:py-5 bg-violet-600 text-white font-bold rounded-2xl hover:bg-violet-500 transition-all shadow-xl shadow-violet-500/25 w-full sm:w-auto text-center">
                 Get Started Free
               </Link>
               <button 
                 onClick={handleViewDemo}
-                className="px-10 py-5 bg-white/5 border border-white/10 text-white font-bold rounded-2xl hover:bg-white/10 transition-all"
+                className="px-10 py-4 sm:py-5 bg-white/5 border border-white/10 text-white font-bold rounded-2xl hover:bg-white/10 transition-all w-full sm:w-auto"
               >
                 View Demo
               </button>
@@ -407,7 +442,7 @@ export default function LandingPage() {
       </section>
 
       {/* Footer */}
-      <footer className="max-w-7xl mx-auto px-8 py-12 text-center text-slate-500 text-sm">
+      <footer className="relative z-10 max-w-7xl mx-auto px-4 sm:px-8 py-8 sm:py-12 text-center text-slate-500 text-sm">
         <p>&copy; {new Date().getFullYear()} VittVantage. All rights reserved.</p>
       </footer>
     </div>

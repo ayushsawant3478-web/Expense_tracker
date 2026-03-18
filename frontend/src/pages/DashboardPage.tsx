@@ -652,36 +652,50 @@ export default function DashboardPage() {
               )}
             </section>
 
-            <section className="glass-card p-8 rounded-[32px]" style={{ background: 'var(--bg-card)', border: '1px solid var(--border-card)' }}>
-              <div className="flex p-1 bg-white/5 rounded-2xl mb-6">
+            <section className="glass-card p-8 rounded-[32px] relative overflow-hidden" style={{ background: 'var(--bg-card)', border: '1px solid var(--border-card)', perspective: '1200px' }}>
+              <div className="flex p-1.5 bg-white/5 rounded-2xl mb-8 relative z-10 border border-white/5">
                 <button
-                  disabled={isDemo}
                   onClick={() => setActiveTab('expense')}
-                  title={isDemo ? 'Not available in demo mode' : ''}
-                  className={`flex-grow py-2 rounded-xl text-sm font-bold transition-all ${activeTab === 'expense' ? 'bg-violet-600 text-white shadow-lg' : 'text-slate-400 hover:text-white'} ${isDemo ? 'opacity-50 cursor-not-allowed' : ''}`}
+                  className={`flex-grow py-3 rounded-xl text-sm font-extrabold transition-all duration-500 flex items-center justify-center gap-2 ${activeTab === 'expense' ? 'bg-rose-500 text-white shadow-[0_0_20px_rgba(244,63,94,0.3)]' : 'text-slate-400 hover:text-white hover:bg-white/5'}`}
                 >
+                  <TrendingDown className="w-4 h-4" />
                   Expense
                 </button>
                 <button
-                  disabled={isDemo}
                   onClick={() => setActiveTab('income')}
-                  title={isDemo ? 'Not available in demo mode' : ''}
-                  className={`flex-grow py-2 rounded-xl text-sm font-bold transition-all ${activeTab === 'income' ? 'bg-blue-600 text-white shadow-lg' : 'text-slate-400 hover:text-white'} ${isDemo ? 'opacity-50 cursor-not-allowed' : ''}`}
+                  className={`flex-grow py-3 rounded-xl text-sm font-extrabold transition-all duration-500 flex items-center justify-center gap-2 ${activeTab === 'income' ? 'bg-emerald-500 text-white shadow-[0_0_20px_rgba(16,185,129,0.3)]' : 'text-slate-400 hover:text-white hover:bg-white/5'}`}
                 >
+                  <TrendingUp className="w-4 h-4" />
                   Income
                 </button>
               </div>
-              <AnimatePresence mode="wait">
-                <motion.div
-                  key={activeTab}
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -10 }}
-                  transition={{ duration: 0.2 }}
-                >
-                  {activeTab === 'expense' ? <ExpenseForm /> : <IncomeForm />}
-                </motion.div>
-              </AnimatePresence>
+
+              <div className="relative" style={{ minHeight: '400px' }}>
+                <AnimatePresence mode="wait" initial={false}>
+                  <motion.div
+                    key={activeTab}
+                    initial={{ rotateY: activeTab === 'expense' ? -90 : 90, opacity: 0, scale: 0.9 }}
+                    animate={{ rotateY: 0, opacity: 1, scale: 1 }}
+                    exit={{ rotateY: activeTab === 'expense' ? 90 : -90, opacity: 0, scale: 0.9 }}
+                    transition={{ 
+                      type: "spring",
+                      stiffness: 260,
+                      damping: 20,
+                      mass: 1,
+                      duration: 0.6 
+                    }}
+                    style={{ 
+                      backfaceVisibility: 'hidden', 
+                      transformStyle: 'preserve-3d',
+                      width: '100%'
+                    }}
+                  >
+                    <div className="p-2">
+                      {activeTab === 'expense' ? <ExpenseForm /> : <IncomeForm />}
+                    </div>
+                  </motion.div>
+                </AnimatePresence>
+              </div>
             </section>
           </div>
 

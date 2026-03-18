@@ -4,20 +4,17 @@ from flask_cors import CORS
 from flask_jwt_extended import JWTManager
 from flask_bcrypt import Bcrypt
 from dotenv import load_dotenv
-
 from routes.auth_routes import auth_bp
 from routes.expense_routes import expense_bp
 from routes.income_routes import income_bp
 from routes.budget_routes import budget_bp
 from routes.market_routes import market_bp
 from routes.goal_routes import goal_bp
-
 from models.user import create_users_table
 from models.expense import create_expenses_table
 from models.income import create_income_table
 from models.budget import create_budgets_table
 from models.goal import create_goals_table
-
 from config import Config
 
 load_dotenv()
@@ -29,11 +26,15 @@ app.config["JWT_SECRET_KEY"] = os.getenv("JWT_SECRET_KEY")
 jwt = JWTManager(app)
 bcrypt = Bcrypt(app)
 
-# ✅ FINAL CORS FIX
 CORS(
     app,
     resources={r"/*": {"origins": [
         "http://localhost:3000",
+        "http://localhost:3001",
+        "http://localhost:3002",
+        "http://127.0.0.1:3000",
+        "http://127.0.0.1:3001",
+        "http://127.0.0.1:3002",
         "https://vittvantagee.vercel.app"
     ]}},
     supports_credentials=True,

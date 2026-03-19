@@ -75,6 +75,7 @@ const ThemeToggleButton = () => {
 
 const NAV_LINKS = [
   { path: '/dashboard', label: 'Dashboard' },
+  { path: '/add-transaction', label: 'Add' },
   { path: '/transactions', label: 'Transactions' },
   { path: '/analytics', label: 'Analytics' },
   { path: '/goals', label: 'Goals' },

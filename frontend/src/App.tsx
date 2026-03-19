@@ -13,6 +13,7 @@ import GoalsPage from './pages/GoalsPage';
 import InvestmentsPage from './pages/InvestmentsPage';
 import BudgetPage from './pages/BudgetPage';
 import ProfilePage from './pages/ProfilePage';
+import AddTransactionPage from './pages/AddTransactionPage';
 import NotFoundPage from './pages/NotFoundPage';
 
 function PrivateRoute({ children }: { children: React.ReactNode }) {
@@ -33,6 +34,7 @@ function AppContent() {
       <Route path="/investments" element={<PrivateRoute><InvestmentsPage /></PrivateRoute>} />
       <Route path="/budget" element={<PrivateRoute><BudgetPage /></PrivateRoute>} />
       <Route path="/profile" element={<PrivateRoute><ProfilePage /></PrivateRoute>} />
+      <Route path="/add-transaction" element={<PrivateRoute><AddTransactionPage /></PrivateRoute>} />
       <Route path="*" element={<NotFoundPage />} />
     </Routes>
   );

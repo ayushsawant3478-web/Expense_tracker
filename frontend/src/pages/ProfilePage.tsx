@@ -3,16 +3,28 @@ import { useExpense } from '../context/ExpenseContext';
 import Navbar from '../components/Navbar';
 import { motion, AnimatePresence } from 'motion/react';
 import { User, Mail, TrendingUp, TrendingDown, Wallet, Camera, Upload, X } from 'lucide-react';
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, ChangeEvent } from 'react';
+import { useNavigate } from 'react-router-dom';
 
 export default function ProfilePage() {
-  const { user, logout } = useAuth();
+  const { user, logout, isDemo } = useAuth();
   const { transactions } = useExpense();
+  const navigate = useNavigate();
 
-  const [photo, setPhoto] = useState<string | null>(() => localStorage.getItem('vittvantage_photo'));
+  useEffect(() => {
+    if (!user && !isDemo) navigate('/login');
+  }, [user, isDemo, navigate]);
+
+  const photoKey = user ? `vittvantage_photo_${user.id}` : 'vittvantage_photo_guest';
+  const [photo, setPhoto] = useState<string | null>(() => localStorage.getItem(photoKey));
   const [showOptions, setShowOptions] = useState(false);
   const [showCamera, setShowCamera] = useState(false);
   const [cameraError, setCameraError] = useState<string | null>(null);
+
+  // Update photo when user changes
+  useEffect(() => {
+    setPhoto(localStorage.getItem(photoKey));
+  }, [photoKey]);
 
   const fileInputRef = useRef<HTMLInputElement>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
@@ -59,19 +71,19 @@ export default function ProfilePage() {
     canvas.getContext('2d')?.drawImage(video, 0, 0);
     const dataUrl = canvas.toDataURL('image/jpeg', 0.8);
     setPhoto(dataUrl);
-    localStorage.setItem('vittvantage_photo', dataUrl);
+    localStorage.setItem(photoKey, dataUrl);
     stopCamera();
   };
 
   // Upload from file
-  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileUpload = (e: ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
     const reader = new FileReader();
     reader.onload = (ev) => {
       const dataUrl = ev.target?.result as string;
       setPhoto(dataUrl);
-      localStorage.setItem('vittvantage_photo', dataUrl);
+      localStorage.setItem(photoKey, dataUrl);
       setShowOptions(false);
     };
     reader.readAsDataURL(file);
@@ -80,7 +92,7 @@ export default function ProfilePage() {
   // Remove photo
   const removePhoto = () => {
     setPhoto(null);
-    localStorage.removeItem('vittvantage_photo');
+    localStorage.removeItem(photoKey);
     setShowOptions(false);
   };
 

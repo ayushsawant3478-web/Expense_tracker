@@ -177,68 +177,68 @@ export default function DashboardPage() {
       });
     }
     return suggestions;
-  };
-
-  const getInvestmentPlan = (s: number) => {
-    if (s <= 0) return {
-      name: "No Savings", range: "₹0 or Negative",
-      theme: { text: "text-rose-400", bg: "bg-rose-500/10", border: "border-rose-500/20" },
-      suggestions: [
-        { title: "Cut Expenses", desc: "Reduce discretionary spends and renegotiate bills to lower recurring costs." },
-        { title: "Track Spending", desc: "Use category tracking to spot leaks and set weekly caps." },
-        { title: "Start Emergency Fund", desc: "Park small amounts regularly to build a 1-month buffer." }
-      ]
-    };
-    if (s <= 2000) return {
-      name: "Starter", range: "₹1 - ₹2,000",
-      theme: { text: "text-amber-400", bg: "bg-amber-500/10", border: "border-amber-500/20" },
-      suggestions: [
-        { title: "Digital Gold", desc: "Begin with tiny ticket sizes to build a habit." },
-        { title: "Recurring Deposit", desc: "Automate a monthly RD with a fixed term." },
-        { title: "Round-up Apps", desc: "Use round-up savings to capture spare change." }
-      ]
-    };
-    if (s <= 5000) return {
-      name: "Growing", range: "₹2,000 - ₹5,000",
-      theme: { text: "text-amber-400", bg: "bg-amber-500/10", border: "border-amber-500/20" },
-      suggestions: [
-        { title: "Mutual Fund SIP", desc: "Start diversified equity or hybrid SIPs." },
-        { title: "Liquid Funds", desc: "Keep short-term surplus accessible and low-risk." },
-        { title: "Open PPF", desc: "Lock long-term savings with tax benefits." }
-      ]
-    };
-    if (s <= 10000) return {
-      name: "Moderate", range: "₹5,000 - ₹10,000",
-      theme: { text: "text-emerald-400", bg: "bg-emerald-500/10", border: "border-emerald-500/20" },
-      suggestions: [
-        { title: "Index Funds", desc: "Allocate core exposure to broad market indices." },
-        { title: "US ETFs", desc: "Add international diversification within limits." },
-        { title: "Fixed Deposits", desc: "Stabilize portion with assured returns." }
-      ]
-    };
-    if (s <= 25000) return {
-      name: "Strong", range: "₹10,000 - ₹25,000",
-      theme: { text: "text-emerald-400", bg: "bg-emerald-500/10", border: "border-emerald-500/20" },
-      suggestions: [
-        { title: "Diversified Portfolio", desc: "Balance equity, debt, and international exposure." },
-        { title: "Blue Chip Stocks", desc: "Add quality large-caps for stability." },
-        { title: "NPS Pension", desc: "Contribute for long-term retirement corpus and tax." }
-      ]
-    };
-    return {
-      name: "Excellent", range: "Above ₹25,000",
-      theme: { text: "text-emerald-400", bg: "bg-emerald-500/10", border: "border-emerald-500/20" },
-      suggestions: [
-        { title: "REITs", desc: "Gain real estate exposure via yield-focused trusts." },
-        { title: "Emergency Fund 6m", desc: "Scale buffer to six months of expenses." },
-        { title: "ELSS Funds", desc: "Use tax-saving equity funds for Section 80C." }
-      ]
-    };
-  };
-
-  const investmentTier = useMemo(() => getInvestmentPlan(availableSavings), [availableSavings]);
-
-  const savingsTier: 'none' | 'starter' | 'growing' | 'moderate' | 'good' | 'excellent' = useMemo(() => {
+   };
+ 
+   const getInvestmentPlan = (s: number) => {
+     if (s <= 0) return {
+       name: "No Savings", range: "₹0 or Negative",
+       theme: { text: "text-rose-400", bg: "bg-rose-500/10", border: "border-rose-500/20" },
+       suggestions: [
+         { title: "Cut Expenses", desc: "Reduce discretionary spends and renegotiate bills to lower recurring costs." },
+         { title: "Track Spending", desc: "Use category tracking to spot leaks and set weekly caps." },
+         { title: "Start Emergency Fund", desc: "Park small amounts regularly to build a 1-month buffer." }
+       ]
+     };
+     if (s <= 2000) return {
+       name: "Starter", range: "₹1 - ₹2,000",
+       theme: { text: "text-amber-400", bg: "bg-amber-500/10", border: "border-amber-500/20" },
+       suggestions: [
+         { title: "Digital Gold", desc: "Begin with tiny ticket sizes to build a habit." },
+         { title: "Recurring Deposit", desc: "Automate a monthly RD with a fixed term." },
+         { title: "Round-up Apps", desc: "Use round-up savings to capture spare change." }
+       ]
+     };
+     if (s <= 5000) return {
+       name: "Growing", range: "₹2,000 - ₹5,000",
+       theme: { text: "text-amber-400", bg: "bg-amber-500/10", border: "border-amber-500/20" },
+       suggestions: [
+         { title: "Mutual Fund SIP", desc: "Start diversified equity or hybrid SIPs." },
+         { title: "Liquid Funds", desc: "Keep short-term surplus accessible and low-risk." },
+         { title: "Open PPF", desc: "Lock long-term savings with tax benefits." }
+       ]
+     };
+     if (s <= 10000) return {
+       name: "Moderate", range: "₹5,000 - ₹10,000",
+       theme: { text: "text-emerald-400", bg: "bg-emerald-500/10", border: "border-emerald-500/20" },
+       suggestions: [
+         { title: "Index Funds", desc: "Allocate core exposure to broad market indices." },
+         { title: "US ETFs", desc: "Add international diversification within limits." },
+         { title: "Fixed Deposits", desc: "Stabilize portion with assured returns." }
+       ]
+     };
+     if (s <= 25000) return {
+       name: "Strong", range: "₹10,000 - ₹25,000",
+       theme: { text: "text-emerald-400", bg: "bg-emerald-500/10", border: "border-emerald-500/20" },
+       suggestions: [
+         { title: "Diversified Portfolio", desc: "Balance equity, debt, and international exposure." },
+         { title: "Blue Chip Stocks", desc: "Add quality large-caps for stability." },
+         { title: "NPS Pension", desc: "Contribute for long-term retirement corpus and tax." }
+       ]
+     };
+     return {
+       name: "Excellent", range: "Above ₹25,000",
+       theme: { text: "text-emerald-400", bg: "bg-emerald-500/10", border: "border-emerald-500/20" },
+       suggestions: [
+         { title: "REITs", desc: "Gain real estate exposure via yield-focused trusts." },
+         { title: "Emergency Fund 6m", desc: "Scale buffer to six months of expenses." },
+         { title: "ELSS Funds", desc: "Use tax-saving equity funds for Section 80C." }
+       ]
+     };
+   };
+ 
+   const investmentTier = useMemo(() => getInvestmentPlan(availableSavings), [availableSavings]);
+ 
+   const savingsTier: 'none' | 'starter' | 'growing' | 'moderate' | 'good' | 'excellent' = useMemo(() => {
     if (availableSavings <= 0) return 'none';
     if (availableSavings < 2000) return 'starter';
     if (availableSavings < 5000) return 'growing';
@@ -482,6 +482,98 @@ export default function DashboardPage() {
           ))}
         </div>
 
+        {/* Quick Add Transaction Section */}
+        <motion.section
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.3 }}
+          className="mb-12"
+        >
+          <div className="flex items-center justify-between mb-6">
+            <h2 className="text-xl font-bold flex items-center gap-2">
+              <Plus className="w-5 h-5 text-violet-400" />
+              Quick Add Transaction
+            </h2>
+            <Link 
+              to="/add-transaction" 
+              className="text-sm font-bold text-violet-400 hover:text-violet-300 transition-colors flex items-center gap-1"
+            >
+              Full Page Editor <ChevronRight className="w-4 h-4" />
+            </Link>
+          </div>
+          
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            <div className="lg:col-span-2">
+              <div className="glass-card p-8 rounded-[32px] relative overflow-hidden" style={{ background: 'var(--bg-card)', border: '1px solid var(--border-card)', perspective: '1200px' }}>
+                <div className="flex p-1.5 bg-white/5 rounded-2xl mb-8 relative z-10 border border-white/5 max-w-md mx-auto">
+                  <button
+                    onClick={() => setActiveTab('expense')}
+                    className={`flex-grow py-3 rounded-xl text-sm font-extrabold transition-all duration-500 flex items-center justify-center gap-2 ${activeTab === 'expense' ? 'bg-rose-500 text-white shadow-[0_0_20px_rgba(244,63,94,0.3)]' : 'text-slate-400 hover:text-white hover:bg-white/5'}`}
+                  >
+                    <TrendingDown className="w-4 h-4" />
+                    Expense
+                  </button>
+                  <button
+                    onClick={() => setActiveTab('income')}
+                    className={`flex-grow py-3 rounded-xl text-sm font-extrabold transition-all duration-500 flex items-center justify-center gap-2 ${activeTab === 'income' ? 'bg-emerald-500 text-white shadow-[0_0_20px_rgba(16,185,129,0.3)]' : 'text-slate-400 hover:text-white hover:bg-white/5'}`}
+                  >
+                    <TrendingUp className="w-4 h-4" />
+                    Income
+                  </button>
+                </div>
+
+                <div className="relative">
+                  <AnimatePresence mode="wait" initial={false}>
+                    <motion.div
+                      key={activeTab}
+                      initial={{ rotateY: activeTab === 'expense' ? -90 : 90, opacity: 0, scale: 0.9 }}
+                      animate={{ rotateY: 0, opacity: 1, scale: 1 }}
+                      exit={{ rotateY: activeTab === 'expense' ? 90 : -90, opacity: 0, scale: 0.9 }}
+                      transition={{ 
+                        type: "spring",
+                        stiffness: 260,
+                        damping: 20,
+                        mass: 1,
+                        duration: 0.6 
+                      }}
+                      style={{ 
+                        backfaceVisibility: 'hidden', 
+                        transformStyle: 'preserve-3d',
+                        width: '100%'
+                      }}
+                    >
+                      <div className="p-2">
+                        {activeTab === 'expense' ? <ExpenseForm /> : <IncomeForm />}
+                      </div>
+                    </motion.div>
+                  </AnimatePresence>
+                </div>
+              </div>
+            </div>
+            
+            <div className="lg:col-span-1 space-y-6">
+              <div className="glass-card p-8 rounded-[32px] h-full flex flex-col justify-center" style={{ background: 'var(--bg-card)', border: '1px solid var(--border-card)' }}>
+                <h3 className="text-lg font-bold mb-4">Why track daily?</h3>
+                <ul className="space-y-4">
+                  {[
+                    "Spot spending leaks early",
+                    "Maintain accurate monthly budgets",
+                    "Build better financial discipline",
+                    "Never miss a recurring expense"
+                  ].map((text, i) => (
+                    <li key={i} className="flex items-start gap-3 text-sm" style={{ color: 'var(--text-secondary)' }}>
+                      <div className="w-5 h-5 rounded-full bg-violet-500/10 flex items-center justify-center shrink-0 mt-0.5">
+                        <Zap className="w-3 h-3 text-violet-400" />
+                      </div>
+                      {text}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            </div>
+          </div>
+        </motion.section>
+
         {/* Savings Progress & Tip */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-12">
           <motion.div
@@ -552,7 +644,7 @@ export default function DashboardPage() {
           </div>
         </motion.section>
 
-        {/* Investment Suggestions */}
+        {/* Investment Suggestions - RESTORED AND REPOSITIONED */}
         <motion.section
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -620,11 +712,11 @@ export default function DashboardPage() {
         </AnimatePresence>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          {/* Left Column */}
+          {/* Left Column - Compact Budget & Goals Info */}
           <div className="lg:col-span-1 space-y-8">
             <section className="glass-card p-8 rounded-[32px]" style={{ background: 'var(--bg-card)', border: '1px solid var(--border-card)' }}>
               <div className="flex items-center justify-between mb-6">
-                <h2 className="text-xl font-bold">Manage Budget</h2>
+                <h2 className="text-xl font-bold">Monthly Budget</h2>
                 <button onClick={() => setIsEditingBudget(!isEditingBudget)} className="p-2 hover:bg-white/5 rounded-xl transition-colors text-violet-500">
                   <Edit2 className="w-5 h-5" />
                 </button>
@@ -646,57 +738,42 @@ export default function DashboardPage() {
                 </div>
               ) : (
                 <div className="p-4 rounded-2xl" style={{ background: 'var(--bg-card)', border: '1px solid var(--border-card)' }}>
-                  <p className="text-sm mb-1" style={{ color: 'var(--text-secondary)' }}>Budget for {getMonthLabel()}</p>
-                  <p className="text-2xl font-mono font-bold">₹{currentBudgetAmount.toLocaleString('en-IN')}</p>
+                  <div className="flex justify-between items-end mb-4">
+                    <div>
+                      <p className="text-sm mb-1" style={{ color: 'var(--text-secondary)' }}>Limit for {getMonthLabel()}</p>
+                      <p className="text-3xl font-mono font-bold">₹{currentBudgetAmount.toLocaleString('en-IN')}</p>
+                    </div>
+                    <div className="text-right">
+                      <p className="text-sm mb-1" style={{ color: 'var(--text-secondary)' }}>Spent</p>
+                      <p className={`text-xl font-mono font-bold ${budgetExceeded ? 'text-rose-500' : 'text-emerald-500'}`}>
+                        {((expenses / (currentBudgetAmount || 1)) * 100).toFixed(0)}%
+                      </p>
+                    </div>
+                  </div>
+                  <div className="w-full bg-white/5 rounded-full h-2 overflow-hidden">
+                    <motion.div
+                      className={`${budgetExceeded ? 'bg-rose-500' : 'bg-emerald-500'} h-full rounded-full`}
+                      initial={{ width: 0 }}
+                      animate={{ width: `${Math.min(100, (expenses / (currentBudgetAmount || 1)) * 100)}%` }}
+                      transition={{ duration: 1 }}
+                    />
+                  </div>
                 </div>
               )}
             </section>
-
-            <section className="glass-card p-8 rounded-[32px] relative overflow-hidden" style={{ background: 'var(--bg-card)', border: '1px solid var(--border-card)', perspective: '1200px' }}>
-              <div className="flex p-1.5 bg-white/5 rounded-2xl mb-8 relative z-10 border border-white/5">
-                <button
-                  onClick={() => setActiveTab('expense')}
-                  className={`flex-grow py-3 rounded-xl text-sm font-extrabold transition-all duration-500 flex items-center justify-center gap-2 ${activeTab === 'expense' ? 'bg-rose-500 text-white shadow-[0_0_20px_rgba(244,63,94,0.3)]' : 'text-slate-400 hover:text-white hover:bg-white/5'}`}
-                >
-                  <TrendingDown className="w-4 h-4" />
-                  Expense
-                </button>
-                <button
-                  onClick={() => setActiveTab('income')}
-                  className={`flex-grow py-3 rounded-xl text-sm font-extrabold transition-all duration-500 flex items-center justify-center gap-2 ${activeTab === 'income' ? 'bg-emerald-500 text-white shadow-[0_0_20px_rgba(16,185,129,0.3)]' : 'text-slate-400 hover:text-white hover:bg-white/5'}`}
-                >
-                  <TrendingUp className="w-4 h-4" />
-                  Income
-                </button>
+            
+            {/* Quick Link to Add Page */}
+            <Link 
+              to="/add-transaction"
+              className="block glass-card p-8 rounded-[32px] group relative overflow-hidden transition-all hover:scale-[1.02]"
+              style={{ background: 'linear-gradient(135deg, rgba(124,58,237,0.1), rgba(37,99,235,0.1))', border: '1px solid rgba(139,92,246,0.2)' }}
+            >
+              <div className="relative z-10">
+                <h3 className="text-xl font-bold mb-2 group-hover:text-violet-400 transition-colors">Add New Record</h3>
+                <p className="text-sm" style={{ color: 'var(--text-secondary)' }}>Jump to the dedicated transaction editor for more details.</p>
               </div>
-
-              <div className="relative" style={{ minHeight: '400px' }}>
-                <AnimatePresence mode="wait" initial={false}>
-                  <motion.div
-                    key={activeTab}
-                    initial={{ rotateY: activeTab === 'expense' ? -90 : 90, opacity: 0, scale: 0.9 }}
-                    animate={{ rotateY: 0, opacity: 1, scale: 1 }}
-                    exit={{ rotateY: activeTab === 'expense' ? 90 : -90, opacity: 0, scale: 0.9 }}
-                    transition={{ 
-                      type: "spring",
-                      stiffness: 260,
-                      damping: 20,
-                      mass: 1,
-                      duration: 0.6 
-                    }}
-                    style={{ 
-                      backfaceVisibility: 'hidden', 
-                      transformStyle: 'preserve-3d',
-                      width: '100%'
-                    }}
-                  >
-                    <div className="p-2">
-                      {activeTab === 'expense' ? <ExpenseForm /> : <IncomeForm />}
-                    </div>
-                  </motion.div>
-                </AnimatePresence>
-              </div>
-            </section>
+              <Plus className="absolute -right-4 -bottom-4 w-24 h-24 opacity-5 group-hover:opacity-10 transition-opacity" />
+            </Link>
           </div>
 
           {/* Right Column */}

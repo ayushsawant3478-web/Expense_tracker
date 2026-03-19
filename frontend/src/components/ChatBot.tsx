@@ -7,7 +7,7 @@ import { useExpense } from '../context/ExpenseContext';
 import { useAuth } from '../context/AuthContext';
 import { useTheme } from '../context/ThemeContext';
 
-const genAI = new GoogleGenerativeAI('AIzaSyC8_ZX46Iqa-wDhMzhtIfCtllz_rAt9evM');
+const genAI = new GoogleGenerativeAI(import.meta.env.VITE_GEMINI_API_KEY);
 
 interface Message {
   role: 'user' | 'bot';

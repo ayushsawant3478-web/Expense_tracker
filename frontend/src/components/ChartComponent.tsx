@@ -7,15 +7,16 @@ interface ChartComponentProps {
 }
 
 const COLORS = [
-  '#8b5cf6', // violet - Food
-  '#3b82f6', // blue - Travel  
-  '#f59e0b', // amber - Bills
-  '#10b981', // emerald - Shopping
-  '#ec4899', // pink - Entertainment
-  '#f43f5e', // rose - Health
-  '#06b6d4', // cyan - Education
-  '#f97316', // orange - Other
+  '#8b5cf6',
+  '#3b82f6',
+  '#f59e0b',
+  '#10b981',
+  '#ec4899',
+  '#f43f5e',
+  '#06b6d4',
+  '#f97316',
 ];
+
 export default function ChartComponent({ transactions }: ChartComponentProps) {
   const { theme } = useTheme();
   const chartTheme = {
@@ -23,6 +24,7 @@ export default function ChartComponent({ transactions }: ChartComponentProps) {
     light: { grid: '#e2e8f0', text: '#64748b', tooltip: { bg: '#ffffff', text: '#0f172a' } }
   } as const;
   const t = chartTheme[theme];
+
   const dataForPieChart = transactions.reduce((acc, transaction) => {
     if (transaction.type === 'expense') {
       const existing = acc.find(item => item.name === transaction.category);
@@ -36,7 +38,7 @@ export default function ChartComponent({ transactions }: ChartComponentProps) {
   }, [] as { name: string; value: number }[]);
 
   const monthlyData = transactions.reduce((acc, transaction) => {
-    const month = transaction.date.substring(0, 7); // YYYY-MM
+    const month = transaction.date.substring(0, 7);
     if (!acc[month]) {
       acc[month] = { month, income: 0, expenses: 0 };
     }
@@ -66,12 +68,24 @@ export default function ChartComponent({ transactions }: ChartComponentProps) {
     return null;
   };
 
+  // Show empty state if no data
+  if (transactions.length === 0) {
+    return (
+      <div className="flex items-center justify-center h-[300px]" style={{ color: 'var(--text-secondary)' }}>
+        <p className="text-sm">No transactions to display</p>
+      </div>
+    );
+  }
+
   return (
     <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
-      <div className="h-[450px] flex flex-col">
-        <h3 className="text-sm font-bold uppercase tracking-widest mb-6" style={{ color: 'var(--text-secondary)' }}>Expense Distribution</h3>
-        <div className="flex-grow">
-          <ResponsiveContainer width="100%" height="100%">
+      {/* Pie Chart */}
+      <div className="flex flex-col" style={{ minHeight: '400px' }}>
+        <h3 className="text-sm font-bold uppercase tracking-widest mb-6" style={{ color: 'var(--text-secondary)' }}>
+          Expense Distribution
+        </h3>
+        <div style={{ flex: 1, minHeight: '320px' }}>
+          <ResponsiveContainer width="100%" height={320}>
             <PieChart>
               <defs>
                 <linearGradient id="incGrad" x1="0" y1="0" x2="1" y2="1">
@@ -95,49 +109,71 @@ export default function ChartComponent({ transactions }: ChartComponentProps) {
                 stroke="none"
               >
                 {dataForPieChart.map((_, index) => (
-                  <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} stroke="#0e0f12" strokeWidth={2} />
+                  <Cell
+                    key={`cell-${index}`}
+                    fill={COLORS[index % COLORS.length]}
+                    stroke="#0e0f12"
+                    strokeWidth={2}
+                  />
                 ))}
               </Pie>
               <Tooltip content={<CustomTooltip />} />
-              <Legend 
-                verticalAlign="bottom" 
+              <Legend
+                verticalAlign="bottom"
                 align="center"
-                iconType="circle" 
-                wrapperStyle={{ paddingTop: '30px', fontSize: '12px' }} 
+                iconType="circle"
+                wrapperStyle={{ paddingTop: '20px', fontSize: '12px' }}
               />
             </PieChart>
           </ResponsiveContainer>
         </div>
       </div>
-      <div className="h-[450px] flex flex-col">
-        <h3 className="text-sm font-bold uppercase tracking-widest mb-6" style={{ color: 'var(--text-secondary)' }}>Cash Flow History</h3>
-        <div className="flex-grow">
-          <ResponsiveContainer width="100%" height="100%">
-            <BarChart data={dataForBarChart}>
+
+      {/* Bar Chart */}
+      <div className="flex flex-col" style={{ minHeight: '400px' }}>
+        <h3 className="text-sm font-bold uppercase tracking-widest mb-6" style={{ color: 'var(--text-secondary)' }}>
+          Cash Flow History
+        </h3>
+        <div style={{ flex: 1, minHeight: '320px' }}>
+          <ResponsiveContainer width="100%" height={320}>
+            <BarChart data={dataForBarChart} margin={{ top: 5, right: 10, left: 10, bottom: 5 }}>
+              <defs>
+                <linearGradient id="incGrad2" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stopColor="#7c3aed" />
+                  <stop offset="100%" stopColor="#2563eb" />
+                </linearGradient>
+                <linearGradient id="expGrad2" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stopColor="#f43f5e" />
+                  <stop offset="100%" stopColor="#ec4899" />
+                </linearGradient>
+              </defs>
               <CartesianGrid strokeDasharray="3 3" stroke={t.grid} vertical={false} />
-              <XAxis 
-                dataKey="month" 
-                stroke={t.text} 
-                fontSize={11} 
-                tickLine={false} 
-                axisLine={false} 
+              <XAxis
+                dataKey="month"
+                stroke={t.text}
+                fontSize={11}
+                tickLine={false}
+                axisLine={false}
               />
-              <YAxis 
-                stroke={t.text} 
-                fontSize={11} 
-                tickLine={false} 
-                axisLine={false} 
+              <YAxis
+                stroke={t.text}
+                fontSize={11}
+                tickLine={false}
+                axisLine={false}
                 tickFormatter={(value) => `₹${value}`}
               />
-              <Tooltip content={<CustomTooltip />} cursor={{ fill: theme === 'light' ? 'rgba(0,0,0,0.04)' : 'rgba(255,255,255,0.05)' }} />
-              <Legend 
-                verticalAlign="bottom" 
-                align="center"
-                iconType="circle" 
-                wrapperStyle={{ paddingTop: '30px', fontSize: '12px' }} 
+              <Tooltip
+                content={<CustomTooltip />}
+                cursor={{ fill: theme === 'light' ? 'rgba(0,0,0,0.04)' : 'rgba(255,255,255,0.05)' }}
               />
-              <Bar dataKey="income" fill="url(#incGrad)" radius={[6, 6, 0, 0]} barSize={24} />
-              <Bar dataKey="expenses" fill="url(#expGrad)" radius={[6, 6, 0, 0]} barSize={24} />
+              <Legend
+                verticalAlign="bottom"
+                align="center"
+                iconType="circle"
+                wrapperStyle={{ paddingTop: '20px', fontSize: '12px' }}
+              />
+              <Bar dataKey="income" fill="url(#incGrad2)" radius={[6, 6, 0, 0]} barSize={24} />
+              <Bar dataKey="expenses" fill="url(#expGrad2)" radius={[6, 6, 0, 0]} barSize={24} />
             </BarChart>
           </ResponsiveContainer>
         </div>

@@ -13,7 +13,7 @@ export default function RegisterPage() {
   const [confirmPassword, setConfirmPassword] = useState('');
   const [error, setError] = useState('');
   const [submitting, setSubmitting] = useState(false);
-  const { register } = useAuth();
+  const { register, loginWithGoogle } = useAuth();
   const navigate = useNavigate();
 
   const handleSubmit = async (e: FormEvent) => {
@@ -52,13 +52,7 @@ export default function RegisterPage() {
       });
       const data = await res.json();
       if (data.token) {
-        const username = data.user?.username || data.user?.name || 'User';
-        localStorage.setItem('trackify_token', data.token);
-        localStorage.setItem('trackify_user', JSON.stringify({
-          id: String(data.user.id),
-          username: username,
-          email: data.user.email
-        }));
+        loginWithGoogle(data.user, data.token);
         navigate('/dashboard');
       } else {
         setError(data.error || 'Google sign up failed');

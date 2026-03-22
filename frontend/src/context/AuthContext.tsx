@@ -10,6 +10,7 @@ interface AuthContextType {
   logout: () => void;
   isDemo: boolean;
   activateDemo: () => void;
+  loginWithGoogle: (userData: any, token: string) => void;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -60,8 +61,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const data = await res.json();
     if (!res.ok) throw new Error(data.message || 'Login failed');
 
-    // Fix: handle both data.user.username and data.user.name
-    const username = data.user.username || data.user.name || email.split('@')[0];
+    const username = data.user?.username || data.user?.name || email.split('@')[0];
 
     setUser({
       id: String(data.user.id),
@@ -69,6 +69,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       email: data.user.email
     });
     setToken(data.token);
+    setIsDemo(false);
+  };
+
+  const loginWithGoogle = (userData: any, googleToken: string) => {
+    const username = userData?.username || userData?.name || 'User';
+    const newUser = {
+      id: String(userData.id),
+      username: username,
+      email: userData.email
+    };
+    setUser(newUser);
+    setToken(googleToken);
     setIsDemo(false);
   };
 
@@ -99,7 +111,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   return (
-    <AuthContext.Provider value={{ user, token, login, register, logout, isDemo, activateDemo }}>
+    <AuthContext.Provider value={{ user, token, login, register, logout, isDemo, activateDemo, loginWithGoogle }}>
       {children}
     </AuthContext.Provider>
   );

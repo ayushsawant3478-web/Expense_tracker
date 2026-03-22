@@ -48,7 +48,10 @@ export function GoalProvider({ children }: { children: ReactNode }) {
   };
 
   useEffect(() => {
-    if (!token) return;
+    if (!token) {
+      setGoals([]);
+      return;
+    }
     fetchGoals();
   }, [token]);
 

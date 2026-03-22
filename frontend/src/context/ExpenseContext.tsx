@@ -36,10 +36,22 @@ export function ExpenseProvider({ children }: { children: ReactNode }) {
   });
 
   useEffect(() => {
-    if (!token) return;
-    fetchExpenses();
-    fetchIncome();
-    fetchBudgets();
+    if (!token) {
+      setTransactions([]);
+      setBudgets([]);
+      return;
+    }
+    
+    // Clear data before fetching new data for the current user
+    setTransactions([]);
+    setBudgets([]);
+    
+    // Concurrent fetch for better performance
+    Promise.all([
+      fetchExpenses(),
+      fetchIncome(),
+      fetchBudgets()
+    ]);
   }, [token]);
 
   const fetchExpenses = async () => {

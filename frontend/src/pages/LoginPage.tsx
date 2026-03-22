@@ -12,7 +12,7 @@ export default function LoginPage() {
   const [password, setPassword] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
-  const { login, activateDemo } = useAuth();
+  const { login, activateDemo, loginWithGoogle } = useAuth();
   const { loadDemoData } = useExpense();
   const navigate = useNavigate();
 
@@ -40,7 +40,7 @@ export default function LoginPage() {
   const handleGoogleSuccess = async (credentialResponse: any) => {
     try {
       setSubmitting(true);
-      setError(null);
+      setError('');
       const res = await fetch(`${API_URL}/auth/google`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -48,13 +48,7 @@ export default function LoginPage() {
       });
       const data = await res.json();
       if (data.token) {
-        const username = data.user?.username || data.user?.name || 'User';
-        localStorage.setItem('trackify_token', data.token);
-        localStorage.setItem('trackify_user', JSON.stringify({
-          id: String(data.user.id),
-          username: username,
-          email: data.user.email
-        }));
+        loginWithGoogle(data.user, data.token);
         navigate('/dashboard');
       } else {
         setError(data.error || 'Google login failed');

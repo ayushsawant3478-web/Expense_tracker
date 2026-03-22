@@ -37,9 +37,7 @@ CORS(
         "http://127.0.0.1:3001",
         "http://127.0.0.1:3002",
         "http://127.0.0.1:5173",
-        "https://vittvantage.vercel.app",
-        "https://vittvantagee.vercel.app",
-        "https://trackify.vercel.app",
+        "https://trackify-beta.vercel.app",
         "https://*.vercel.app"
     ]}},
     supports_credentials=True,

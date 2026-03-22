@@ -27,7 +27,7 @@ export default function DashboardPage() {
   // Show banner when user loads
   useEffect(() => {
     if (user || isDemo) {
-      const key = `vittvantage_welcomed_${user?.id || 'demo'}`;
+      const key = `trackify_welcomed_${user?.id || 'demo'}`;
       if (!sessionStorage.getItem(key)) {
         setShowWelcome(true);
       }
@@ -37,7 +37,7 @@ export default function DashboardPage() {
   // Auto dismiss after 4 seconds
   useEffect(() => {
     if (showWelcome) {
-      const key = `vittvantage_welcomed_${user?.id || 'demo'}`;
+      const key = `trackify_welcomed_${user?.id || 'demo'}`;
       sessionStorage.setItem(key, 'true');
       const timer = setTimeout(() => setShowWelcome(false), 4000);
       return () => clearTimeout(timer);
@@ -109,7 +109,7 @@ export default function DashboardPage() {
 
   const exportToExcel = () => {
     const summary = [
-      ['VittVantage — Monthly Report', ''],
+      ['Trackify — Monthly Report', ''],
       ['Month', getMonthLabel()],
       ['Generated On', new Date().toLocaleDateString('en-IN')],
       ['', ''],
@@ -139,7 +139,7 @@ export default function DashboardPage() {
     XLSX.utils.book_append_sheet(wb, txSheet, 'Transactions');
     const excelBuffer = XLSX.write(wb, { bookType: 'xlsx', type: 'array' });
     const blob = new Blob([excelBuffer], { type: 'application/octet-stream' });
-    saveAs(blob, `VittVantage_${currentMonth}.xlsx`);
+    saveAs(blob, `Trackify_${currentMonth}.xlsx`);
   };
 
   const getSuggestions = () => {
@@ -331,16 +331,16 @@ export default function DashboardPage() {
 
                 <div className="flex items-center gap-3 flex-shrink-0">
                   <Link
-                    to="/analytics"
-                    className="hidden sm:flex items-center gap-2 px-4 py-2 text-xs font-bold rounded-xl transition-all hover:scale-105"
-                    style={{
-                      background: 'rgba(139,92,246,0.15)',
-                      border: '1px solid rgba(139,92,246,0.25)',
-                      color: '#a78bfa'
-                    }}
-                  >
-                    View Analytics →
-                  </Link>
+                to="/analytics"
+                className="hidden sm:flex items-center gap-2 px-4 py-2 text-xs font-bold rounded-xl transition-all hover:scale-105"
+                style={{
+                  background: 'rgba(139,92,246,0.15)',
+                  border: '1px solid rgba(139,92,246,0.25)',
+                  color: '#a78bfa'
+                }}
+              >
+                View Analytics →
+              </Link>
                   <button
                     onClick={() => setShowWelcome(false)}
                     className="p-2 rounded-xl transition-all hover:bg-white/10 hover:scale-110"
@@ -612,7 +612,7 @@ export default function DashboardPage() {
             </div>
             <h3 className="text-lg font-bold mb-4 flex items-center gap-2">
               <Zap className="w-5 h-5 text-violet-500" />
-              VittVantage Tip
+              Trackify Tip
             </h3>
             <p className="leading-relaxed text-sm" style={{ color: 'var(--text-primary)' }}>"{randomTip}"</p>
           </motion.div>

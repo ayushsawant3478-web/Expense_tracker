@@ -4,7 +4,7 @@ This file provides guidance to WARP (warp.dev) when working with code in this re
 
 ## Project Overview
 
-**VittVantage** — a full-stack personal finance / expense tracker application for Indian users. The app allows users to track income and expenses, set monthly budgets, manage savings goals, view analytics, and monitor live Indian market data (stocks, mutual funds, gold, REITs).
+**Trackify** — a full-stack personal finance / expense tracker application for Indian users. The app allows users to track income and expenses, set monthly budgets, manage savings goals, view analytics, and monitor live Indian market data (stocks, mutual funds, gold, REITs).
 
 The project is split into two independently deployable services:
 - `frontend/` — React + TypeScript + Vite SPA, deployed on Vercel
@@ -88,7 +88,7 @@ Authentication is JWT-based (`flask-jwt-extended`). Passwords are hashed with bc
 ### Frontend
 
 Context-based state management with three providers wrapping the app:
-- `AuthContext` — JWT token + user object, persisted to `localStorage` under keys `vittvantage_user` / `vittvantage_token`. Supports a **demo mode** (`isDemo`) that bypasses auth and loads mock data without a backend.
+- `AuthContext` — JWT token + user object, persisted to `localStorage` under keys `trackify_user` / `trackify_token`. Supports a **demo mode** (`isDemo`) that bypasses auth and loads mock data without a backend.
 - `ExpenseContext` — fetches and caches all transactions (expenses + income) and budgets from the backend. Transactions are stored as a unified `Transaction[]` array with a `type: 'income' | 'expense'` discriminator.
 - `GoalContext` — savings goals, synced with `/goals` API.
 
@@ -101,5 +101,5 @@ The **ChatBot** component (`src/components/ChatBot.tsx`) uses the `@google/genai
 ### Deployment
 
 - Frontend is deployed to Vercel. `frontend/vercel.json` sets `Cross-Origin-Opener-Policy: same-origin-allow-popups` (required for Google OAuth popups) and rewrites all routes to `/index.html` for SPA routing.
-- Backend is deployed to Render. CORS is configured in `app.py` to allow `https://vittvantagee.vercel.app` and localhost ports 3000–3002.
+- Backend is deployed to Render. CORS is configured in `app.py` to allow `https://trackify.vercel.app` and localhost ports 3000–3002.
 - Database is Neon (serverless PostgreSQL). The connection string goes directly in `DATABASE_URL`.

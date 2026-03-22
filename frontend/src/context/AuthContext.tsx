@@ -13,13 +13,12 @@ interface AuthContextType {
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
-
-const demoUser = { id: 'demo', username: 'Demo User', email: 'demo@vittvantage.com' };
+const demoUser = { id: 'demo', username: 'Demo User', email: 'demo@trackify.com' };
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(() => {
     try {
-      const saved = localStorage.getItem('vittvantage_user');
+      const saved = localStorage.getItem('trackify_user');
       return saved ? JSON.parse(saved) : null;
     } catch {
       return null;
@@ -28,7 +27,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const [token, setToken] = useState<string | null>(() => {
     try {
-      return localStorage.getItem('vittvantage_token');
+      return localStorage.getItem('trackify_token');
     } catch {
       return null;
     }
@@ -38,17 +37,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     if (user) {
-      localStorage.setItem('vittvantage_user', JSON.stringify(user));
+      localStorage.setItem('trackify_user', JSON.stringify(user));
     } else {
-      localStorage.removeItem('vittvantage_user');
+      localStorage.removeItem('trackify_user');
     }
   }, [user]);
 
   useEffect(() => {
     if (token) {
-      localStorage.setItem('vittvantage_token', token);
+      localStorage.setItem('trackify_token', token);
     } else {
-      localStorage.removeItem('vittvantage_token');
+      localStorage.removeItem('trackify_token');
     }
   }, [token]);
 
@@ -60,7 +59,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     });
     const data = await res.json();
     if (!res.ok) throw new Error(data.message || 'Login failed');
-    setUser({ id: data.user.id, username: data.user.name, email: data.user.email });
+
+    // Fix: handle both data.user.username and data.user.name
+    const username = data.user.username || data.user.name || email.split('@')[0];
+
+    setUser({
+      id: String(data.user.id),
+      username: username,
+      email: data.user.email
+    });
     setToken(data.token);
     setIsDemo(false);
   };
@@ -73,6 +80,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     });
     const data = await res.json();
     if (!res.ok) throw new Error(data.message || 'Register failed');
+
+    // Auto login after register
     await login(email, password);
   };
 
@@ -80,6 +89,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setUser(null);
     setToken(null);
     setIsDemo(false);
+    localStorage.removeItem('trackify_user');
+    localStorage.removeItem('trackify_token');
   };
 
   const activateDemo = () => {

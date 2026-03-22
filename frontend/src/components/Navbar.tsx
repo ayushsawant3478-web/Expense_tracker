@@ -2,7 +2,7 @@ import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useExpense } from '../context/ExpenseContext';
 import { useGoal } from '../context/GoalContext';
-import { Wallet, LogOut, Menu, X, Moon, Sun } from 'lucide-react';
+import { LogOut, Menu, X, Moon, Sun, Wallet } from 'lucide-react';
 import { useTheme } from '../context/ThemeContext';
 import { motion, AnimatePresence } from 'motion/react';
 import { useState } from 'react';
@@ -36,17 +36,9 @@ const ThemeToggleButton = () => {
             animate={{ y: 0, opacity: 1, rotate: 0, scale: 1 }}
             exit={{ y: -20, opacity: 0, rotate: 30, scale: 0.5 }}
             transition={{ type: 'spring', stiffness: 300, damping: 20 }}
-            style={{
-              position: 'absolute',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-            }}
+            style={{ position: 'absolute', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
           >
-            <Moon
-              className="w-5 h-5"
-              style={{ color: '#c4b5fd', filter: 'drop-shadow(0 0 6px rgba(180,180,255,0.5))' }}
-            />
+            <Moon className="w-5 h-5" style={{ color: '#c4b5fd' }} />
           </motion.div>
         ) : (
           <motion.div
@@ -55,17 +47,9 @@ const ThemeToggleButton = () => {
             animate={{ y: 0, opacity: 1, rotate: 0, scale: 1 }}
             exit={{ y: -20, opacity: 0, rotate: -30, scale: 0.5 }}
             transition={{ type: 'spring', stiffness: 300, damping: 20 }}
-            style={{
-              position: 'absolute',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-            }}
+            style={{ position: 'absolute', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
           >
-            <Sun
-              className="w-5 h-5"
-              style={{ color: '#fbbf24', filter: 'drop-shadow(0 0 8px rgba(251,191,36,0.7))' }}
-            />
+            <Sun className="w-5 h-5" style={{ color: '#fbbf24' }} />
           </motion.div>
         )}
       </AnimatePresence>
@@ -115,19 +99,19 @@ export default function Navbar() {
         }}
       >
         <div className="max-w-7xl mx-auto px-6 py-3 flex justify-between items-center">
-          
+
           {/* Logo */}
-            <Link to={user ? "/dashboard" : "/"} className="flex items-center gap-2 group">
+          <Link to={user ? "/dashboard" : "/"} className="flex items-center gap-2 group">
             <div className="w-8 h-8 bg-violet-600 rounded-lg flex items-center justify-center shadow-lg shadow-violet-500/20 group-hover:scale-110 transition-transform">
               <Wallet className="w-5 h-5 text-white" />
             </div>
             <span className="text-lg font-bold tracking-tight" style={{ color: 'var(--text-primary)' }}>
-              VittVantage
+              Trackify
             </span>
           </Link>
 
           {/* Desktop Nav Links */}
-          {user && (
+          {(user || isDemo) && (
             <div className="hidden lg:flex items-center gap-1">
               {NAV_LINKS.map(({ path, label }) => {
                 const isActive = location.pathname === path;
@@ -153,24 +137,26 @@ export default function Navbar() {
           <div className="flex items-center gap-3">
             <ThemeToggleButton />
 
-            {user ? (
+            {user || isDemo ? (
               <div className="flex items-center gap-3">
-                {isDemo && (
+                {/* Single button — Exit Demo or Logout */}
+                {isDemo ? (
                   <button
                     onClick={handleLogout}
                     className="hidden md:flex items-center gap-2 px-4 py-2 bg-rose-500/10 text-rose-400 text-sm font-bold rounded-xl hover:bg-rose-500/20 transition-all border border-rose-500/20"
                   >
                     Exit Demo
                   </button>
+                ) : (
+                  <button
+                    onClick={handleLogout}
+                    className="hidden md:flex items-center gap-2 text-sm font-bold transition-colors px-3 py-2 rounded-xl hover:bg-white/5"
+                    style={{ color: 'var(--text-secondary)' }}
+                  >
+                    <LogOut className="w-4 h-4" />
+                    Logout
+                  </button>
                 )}
-                <button
-                  onClick={handleLogout}
-                  className="hidden md:flex items-center gap-2 text-sm font-bold transition-colors px-3 py-2 rounded-xl hover:bg-white/5"
-                  style={{ color: 'var(--text-secondary)' }}
-                >
-                  <LogOut className="w-4 h-4" />
-                  {isDemo ? 'Exit Demo' : 'Logout'}
-                </button>
               </div>
             ) : (
               <div className="hidden md:flex items-center gap-4">
@@ -191,13 +177,13 @@ export default function Navbar() {
             )}
 
             {/* Mobile menu button */}
-             <button
-               onClick={() => setMenuOpen(!menuOpen)}
-               className="md:hidden p-2 rounded-xl hover:bg-white/5 transition-colors"
-               style={{ color: 'var(--text-secondary)' }}
-             >
-               {menuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
-             </button>
+            <button
+              onClick={() => setMenuOpen(!menuOpen)}
+              className="md:hidden p-2 rounded-xl hover:bg-white/5 transition-colors"
+              style={{ color: 'var(--text-secondary)' }}
+            >
+              {menuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+            </button>
           </div>
         </div>
       </nav>
@@ -219,7 +205,7 @@ export default function Navbar() {
             }}
           >
             <div className="flex flex-col gap-2 py-2">
-              {user ? (
+              {user || isDemo ? (
                 <>
                   {NAV_LINKS.map(({ path, label }) => {
                     const isActive = location.pathname === path;
@@ -242,29 +228,29 @@ export default function Navbar() {
                     onClick={() => { handleLogout(); setMenuOpen(false); }}
                     className="px-4 py-3 rounded-xl text-sm font-medium text-left transition-all text-rose-400 hover:bg-rose-500/10"
                   >
-                    Logout
+                    {isDemo ? 'Exit Demo' : 'Logout'}
                   </button>
                 </>
               ) : (
                 <div className="flex flex-col gap-4 p-2">
-                  <Link 
-                    to="/login" 
-                    onClick={() => setMenuOpen(false)} 
+                  <Link
+                    to="/login"
+                    onClick={() => setMenuOpen(false)}
                     className="text-lg font-medium"
                     style={{ color: 'var(--text-secondary)' }}
                   >
                     Login
                   </Link>
-                  <button 
+                  <button
                     onClick={handleEnterDemo}
                     className="text-left text-lg font-medium"
                     style={{ color: 'var(--text-secondary)' }}
                   >
                     View Demo
                   </button>
-                  <Link 
-                    to="/register" 
-                    onClick={() => setMenuOpen(false)} 
+                  <Link
+                    to="/register"
+                    onClick={() => setMenuOpen(false)}
                     className="w-full py-4 bg-violet-600 text-white font-bold rounded-2xl text-center shadow-lg shadow-violet-500/20"
                   >
                     Get Started

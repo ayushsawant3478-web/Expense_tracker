@@ -22,3 +22,12 @@ export const FINANCIAL_TIPS = [
   "Use cash for discretionary spending to feel the 'pain' of paying.",
   "Prioritize high-interest debt repayment to save on interest."
 ];
+
+// Ping backend every 10 minutes to keep it awake
+export const pingBackend = () => {
+  setInterval(async () => {
+    try {
+      await fetch(`${API_URL}/`);
+    } catch (e) {}
+  }, 10 * 60 * 1000);
+};

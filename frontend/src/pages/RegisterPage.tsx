@@ -39,7 +39,7 @@ export default function RegisterPage() {
             <Wallet className="w-7 h-7" style={{ color: 'var(--text-primary)' }} />
           </div>
           <h2 className="text-3xl font-bold tracking-tight" style={{ color: 'var(--text-primary)' }}>Create Account</h2>
-          <p className="mt-2" style={{ color: 'var(--text-secondary)' }}>Join VittVantage today</p>
+          <p className="mt-2" style={{ color: 'var(--text-secondary)' }}>Join Trackify today</p>
         </div>
 
         <form className="space-y-5" onSubmit={handleSubmit}>

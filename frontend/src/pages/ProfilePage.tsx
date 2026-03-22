@@ -15,7 +15,7 @@ export default function ProfilePage() {
     if (!user && !isDemo) navigate('/login');
   }, [user, isDemo, navigate]);
 
-  const photoKey = user ? `vittvantage_photo_${user.id}` : 'vittvantage_photo_guest';
+  const photoKey = user ? `trackify_photo_${user.id}` : 'trackify_photo_guest';
   const [photo, setPhoto] = useState<string | null>(() => localStorage.getItem(photoKey));
   const [showOptions, setShowOptions] = useState(false);
   const [showCamera, setShowCamera] = useState(false);

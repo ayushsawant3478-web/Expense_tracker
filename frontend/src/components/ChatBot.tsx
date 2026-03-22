@@ -21,7 +21,7 @@ export default function ChatBot() {
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
   const [isSmallMobile, setIsSmallMobile] = useState(window.innerWidth < 640);
   const [messages, setMessages] = useState<Message[]>([
-    { role: 'bot', text: 'Hi! I am your VittVantage financial assistant. Ask me anything about your finances, budgeting, or investments!' }
+    { role: 'bot', text: 'Hi! I am your Trackify financial assistant. Ask me anything about your finances, budgeting, or investments!' }
   ]);
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
@@ -60,7 +60,7 @@ export default function ChatBot() {
       Total Expenses: ₹${expenses}
       Net Savings: ₹${netBalance}
       Top Expenses: ${topExpenses}
-      You are a helpful Indian personal finance assistant for the app VittVantage.
+      You are a helpful Indian personal finance assistant for the app Trackify.
       Always respond in a friendly, concise way. Use ₹ for currency.
       Give practical advice based on the user's actual financial data above.
     `;
@@ -174,7 +174,7 @@ export default function ChatBot() {
                 <Bot className="w-5 h-5" style={{ color: isDark ? '#a78bfa' : '#7c3aed' }} />
               </div>
               <div>
-                <p className="text-sm font-semibold" style={{ color: isDark ? '#ffffff' : '#1e293b' }}>VittVantage AI</p>
+                <p className="text-sm font-semibold" style={{ color: isDark ? '#ffffff' : '#1e293b' }}>Trackify AI</p>
                 <p className="text-xs text-emerald-400 flex items-center gap-1">
                   <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 inline-block animate-pulse" />
                   Online

@@ -79,13 +79,13 @@ export default function LandingPage() {
   };
 
   const phrases = [
-    'Master your wealth with precision.',
+    'Track smarter. Save better.',
     'Track every rupee effortlessly.',
     'Invest smarter every month.',
     'Achieve your financial goals.',
   ];
 
-  const highlights = ['wealth', 'every rupee', 'smarter', 'financial goals'];
+  const highlights = ['Track smarter', 'every rupee', 'smarter', 'financial goals'];
   const { displayText, phraseIndex, isTyping, showCursor } = useTypewriter(phrases);
 
   const renderTypedText = () => {
@@ -136,7 +136,7 @@ export default function LandingPage() {
           <div className="w-10 h-10 bg-violet-600 rounded-xl flex items-center justify-center shadow-lg shadow-violet-500/20">
             <Wallet className="w-6 h-6 text-white" />
           </div>
-          <span className="text-xl font-bold tracking-tight text-white">VittVantage</span>
+          <span className="text-xl font-bold tracking-tight text-white">Trackify</span>
         </div>
         
         {/* Desktop Nav */}
@@ -206,7 +206,7 @@ export default function LandingPage() {
               )}
             </h1>
             <p className="text-base sm:text-xl mb-8 sm:mb-10 max-w-lg leading-relaxed text-slate-400">
-              Track every rupee, set smart budgets, and visualize your financial journey with our premium space-themed manager.
+              Track every rupee, set smart budgets, and visualize your financial journey with Trackify.
             </p>
             <div className="flex flex-col sm:flex-row flex-wrap gap-4">
               <Link to="/register" className="group px-8 py-4 bg-violet-600 font-bold rounded-2xl hover:bg-violet-500 transition-all flex items-center justify-center gap-2 shadow-xl shadow-violet-500/20 text-white w-full sm:w-auto">
@@ -299,7 +299,7 @@ export default function LandingPage() {
           transition={{ duration: 0.6, ease: 'easeOut' }}
           className="text-center mb-12 sm:mb-20"
         >
-          <h2 className="text-3xl sm:text-4xl font-bold mb-4 text-white">Why Choose VittVantage?</h2>
+          <h2 className="text-3xl sm:text-4xl font-bold mb-4 text-white">Why Choose Trackify?</h2>
           <p className="text-slate-400 max-w-2xl mx-auto">Everything you need to manage your money like a pro, all in one beautiful place.</p>
         </motion.div>
         <div className="grid md:grid-cols-3 gap-8 md:gap-12">
@@ -392,7 +392,7 @@ export default function LandingPage() {
         </motion.div>
         <div className="grid md:grid-cols-3 gap-8">
           {[
-            { name: "Sarah J.", role: "Freelancer", quote: "VittVantage completely changed how I track my business expenses. So intuitive!" },
+            { name: "Sarah J.", role: "Freelancer", quote: "Trackify completely changed how I track my business expenses. So intuitive!" },
             { name: "Rahul M.", role: "Software Engineer", quote: "The best finance app I've ever used. The UI is stunning and it's so fast." },
             { name: "Elena K.", role: "Designer", quote: "Finally a finance app that looks as good as it works. The dark mode is perfect." }
           ].map((testimonial, index) => (
@@ -425,7 +425,7 @@ export default function LandingPage() {
             transition={{ duration: 0.6, ease: 'easeOut' }}
           >
             <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold mb-4 sm:mb-6 text-white leading-tight">Ready to take control of your finances?</h2>
-            <p className="text-base sm:text-xl text-slate-400 mb-8 sm:mb-12">Join thousands of users managing their wealth smarter with VittVantage. Free forever.</p>
+            <p className="text-base sm:text-xl text-slate-400 mb-8 sm:mb-12">Join thousands of users managing their wealth smarter with Trackify. Free forever.</p>
             <div className="flex flex-col sm:flex-row flex-wrap justify-center gap-4 sm:gap-6">
               <Link to="/register" className="px-10 py-4 sm:py-5 bg-violet-600 text-white font-bold rounded-2xl hover:bg-violet-500 transition-all shadow-xl shadow-violet-500/25 w-full sm:w-auto text-center">
                 Get Started Free
@@ -443,7 +443,7 @@ export default function LandingPage() {
 
       {/* Footer */}
       <footer className="relative z-10 max-w-7xl mx-auto px-4 sm:px-8 py-8 sm:py-12 text-center text-slate-500 text-sm">
-        <p>&copy; {new Date().getFullYear()} VittVantage. All rights reserved.</p>
+        <p>&copy; {new Date().getFullYear()} Trackify. All rights reserved.</p>
       </footer>
     </div>
   );

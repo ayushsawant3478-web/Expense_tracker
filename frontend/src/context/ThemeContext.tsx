@@ -11,7 +11,7 @@ const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
 
 export function ThemeProvider({ children }: { children: ReactNode }) {
   const [theme, setThemeState] = useState<Theme>(() => {
-    const saved = localStorage.getItem('vittvantage_theme') as Theme | null;
+    const saved = localStorage.getItem('trackify_theme') as Theme | null;
     return saved || 'dark';
   });
 
@@ -22,7 +22,7 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
     } else {
       root.classList.remove('light');
     }
-    localStorage.setItem('vittvantage_theme', theme);
+    localStorage.setItem('trackify_theme', theme);
   }, [theme]);
 
   const setTheme = (t: Theme) => setThemeState(t);

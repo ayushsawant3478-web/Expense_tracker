@@ -12,7 +12,7 @@ export default function LoginPage() {
   const [password, setPassword] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
-  const { login, setIsDemo } = useAuth();
+  const { login, activateDemo, setIsDemo } = useAuth();
   const { loadDemoData } = useExpense();
   const navigate = useNavigate();
 
@@ -32,14 +32,14 @@ export default function LoginPage() {
   };
 
   const handleViewDemo = () => {
-    setIsDemo(true);
+    activateDemo();
     loadDemoData();
-    login('demo@vittvantage.com', 'demo123');
     navigate('/dashboard');
   };
 
   const handleGoogleSuccess = async (credentialResponse: any) => {
     try {
+      setSubmitting(true);
       const res = await fetch(`${API_URL}/auth/google`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -47,15 +47,23 @@ export default function LoginPage() {
       });
       const data = await res.json();
       if (data.token) {
-        localStorage.setItem('vittvantage_token', data.token);
-        localStorage.setItem('vittvantage_user', JSON.stringify(data.user));
+        // Use context properly instead of manually setting localStorage
+        const username = data.user?.username || data.user?.name || 'User';
+        localStorage.setItem('trackify_token', data.token);
+        localStorage.setItem('trackify_user', JSON.stringify({
+          id: String(data.user.id),
+          username: username,
+          email: data.user.email
+        }));
+        // Navigate without reload — this avoids triggering Google auth twice
         navigate('/dashboard');
-        window.location.reload();
       } else {
         setError(data.error || 'Google login failed');
       }
     } catch (err) {
       setError('Google login failed. Try again.');
+    } finally {
+      setSubmitting(false);
     }
   };
 
@@ -72,7 +80,7 @@ export default function LoginPage() {
             <Wallet className="w-7 h-7" style={{ color: 'var(--text-primary)' }} />
           </div>
           <h2 className="text-3xl font-bold tracking-tight" style={{ color: 'var(--text-primary)' }}>Welcome Back</h2>
-          <p className="mt-2" style={{ color: 'var(--text-secondary)' }}>Sign in to manage your wealth</p>
+          <p className="mt-2" style={{ color: 'var(--text-secondary)' }}>Sign in to Trackify</p>
         </div>
 
         <form className="space-y-5" onSubmit={handleSubmit}>
@@ -154,6 +162,7 @@ export default function LoginPage() {
             shape="pill"
             width="100%"
             text="signin_with"
+            useOneTap={false}
           />
         </div>
 

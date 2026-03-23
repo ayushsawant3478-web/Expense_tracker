@@ -57,13 +57,18 @@ def home():
     return "Backend is running 🚀"
 
 with app.app_context():
-    create_users_table()
-    create_expenses_table()
-    create_income_table()
-    create_budgets_table()
-    create_goals_table()
-    print("All tables ready!")
+    try:
+        create_users_table()
+        create_expenses_table()
+        create_income_table()
+        create_budgets_table()
+        create_goals_table()
+        print("All tables ready!")
+    except Exception as e:
+        print(f"Error during table creation: {e}")
+        print("Make sure your DATABASE_URL is correct and accessible.")
 
 if __name__ == "__main__":
     port = int(os.getenv("PORT", "8000"))
-    app.run(debug=True, port=port)
+    # Listen on 0.0.0.0 to ensure connectivity across all local interfaces
+    app.run(debug=True, host="0.0.0.0", port=port)

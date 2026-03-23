@@ -8,7 +8,8 @@ import { GoogleOAuthProvider } from '@react-oauth/google';
 // Keep backend alive — ping every 10 minutes
 setInterval(async () => {
   try {
-    await fetch(`${import.meta.env.VITE_API_URL || 'http://127.0.0.1:8000'}/`);
+    const baseUrl = import.meta.env.VITE_API_URL || 'https://expense-tracker-89aa.onrender.com';
+    await fetch(`${baseUrl}/`);
   } catch {}
 }, 10 * 60 * 1000);
 

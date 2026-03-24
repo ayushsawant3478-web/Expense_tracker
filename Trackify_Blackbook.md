@@ -2833,13 +2833,865 @@ Werkzeug==3.1.6
 
 ---
 
-*End of Trackify Blackbook*
+*(Continued in Appendices D–K below)*
+
+
+---
+---
+
+# **Appendix D: Software Requirement Specification (SRS)**
 
 ---
 
-> **Document generated on:** March 23, 2026
+## **D.1 Product Scope**
+
+Trackify is a web-based personal finance management platform designed for Indian users. It provides income/expense tracking, budget management, savings goals, live market data feeds, and AI-powered financial advisory. The system is accessible via modern web browsers on desktop and mobile devices.
+
+## **D.2 Functional Requirements**
+
+| FR ID | Requirement | Priority | Module |
+|-------|------------|----------|--------|
+| FR-01 | System shall allow users to register with name, email, and password | High | Auth |
+| FR-02 | System shall hash passwords using bcrypt before storage | High | Auth |
+| FR-03 | System shall authenticate users via email/password and return JWT | High | Auth |
+| FR-04 | System shall support Google OAuth 2.0 sign-in | High | Auth |
+| FR-05 | System shall allow users to add expenses with title, amount, category, and note | High | Expense |
+| FR-06 | System shall auto-categorize expenses based on keyword matching | Medium | Expense |
+| FR-07 | System shall display all expenses for the authenticated user sorted by date | High | Expense |
+| FR-08 | System shall allow users to delete expenses | High | Expense |
+| FR-09 | System shall allow users to add income with title, amount, and source | High | Income |
+| FR-10 | System shall auto-categorize income sources based on keyword matching | Medium | Income |
+| FR-11 | System shall allow users to set monthly budget amounts | High | Budget |
+| FR-12 | System shall alert users when expenses exceed the monthly budget | High | Budget |
+| FR-13 | System shall support budget upsert (update existing or insert new) | Medium | Budget |
+| FR-14 | System shall allow users to create savings goals with name, target amount, and deadline | High | Goals |
+| FR-15 | System shall allow users to add money to existing goals | High | Goals |
+| FR-16 | System shall track goal progress as a percentage | High | Goals |
+| FR-17 | System shall mark goals as overdue when deadline passes | Medium | Goals |
+| FR-18 | System shall fetch live Indian market data (indices, stocks, MFs, gold, ELSS, REITs) | High | Market |
+| FR-19 | System shall fetch market data concurrently to minimize response time | Medium | Market |
+| FR-20 | System shall provide a chatbot powered by Google Gemini AI | High | Chat |
+| FR-21 | System shall include user's financial context in chatbot prompts | High | Chat |
+| FR-22 | System shall support a demo mode with mock data | Medium | Auth |
+| FR-23 | System shall support dark and light theme modes | Medium | UI |
+| FR-24 | System shall render interactive charts (pie, bar) for analytics | High | Analytics |
+| FR-25 | System shall export monthly transaction data to Excel (.xlsx) | Medium | Export |
+| FR-26 | System shall provide investment suggestions based on savings tier | Medium | Dashboard |
+| FR-27 | System shall provide financial health suggestions dynamically | Medium | Dashboard |
+| FR-28 | System shall support month-by-month navigation for transaction history | Medium | Dashboard |
+
+## **D.3 Non-Functional Requirements**
+
+| NFR ID | Requirement | Category |
+|--------|------------|----------|
+| NFR-01 | System shall respond to API requests within 500ms (excluding market data) | Performance |
+| NFR-02 | Market data endpoint shall respond within 8 seconds with concurrent fetching | Performance |
+| NFR-03 | System shall handle at least 50 concurrent users without degradation | Scalability |
+| NFR-04 | All passwords shall be hashed with bcrypt (12 salt rounds) | Security |
+| NFR-05 | All API endpoints requiring auth shall validate JWT tokens | Security |
+| NFR-06 | Frontend shall score above 90 on Lighthouse accessibility audit | Usability |
+| NFR-07 | System shall be accessible via Chrome, Firefox, Safari, and Edge | Compatibility |
+| NFR-08 | Frontend shall be responsive for screens from 320px to 2560px | Usability |
+| NFR-09 | System shall maintain 99.5% uptime on Vercel and Render | Availability |
+| NFR-10 | Database shall use SSL connections for all communication | Security |
+| NFR-11 | Frontend bundle size shall not exceed 300KB gzipped | Performance |
+| NFR-12 | System shall persist user preferences (theme, login state) across sessions | Usability |
+
+## **D.4 Hardware and Software Requirements**
+
+### **Development Environment**
+
+| Component | Specification |
+|-----------|--------------|
+| Operating System | macOS / Windows / Linux |
+| Processor | Intel i5 / Apple M1 or equivalent |
+| RAM | Minimum 8 GB |
+| Storage | Minimum 1 GB free disk space |
+| Node.js | v18.x or higher |
+| Python | v3.11 or higher |
+| Browser | Chrome 100+ / Firefox 100+ / Safari 16+ |
+| IDE | Visual Studio Code (recommended) |
+
+### **Production Environment**
+
+| Component | Specification |
+|-----------|--------------|
+| Frontend Hosting | Vercel (Edge Network, auto-scaling) |
+| Backend Hosting | Render (Web Service, 512MB RAM) |
+| Database | Neon Serverless PostgreSQL (0.25 CU auto-scaling) |
+| SSL | Automatic via Vercel and Render |
+| CDN | Vercel Edge Network (global) |
+
+---
+
+# **Appendix E: Data Dictionary**
+
+---
+
+## **E.1 Users Table**
+
+| Field Name | Data Type | Size | Description | Constraints | Example |
+|-----------|-----------|------|-------------|-------------|---------|
+| id | SERIAL | 4 bytes | Auto-incrementing primary key | PK, NOT NULL | 1, 2, 3 |
+| name | VARCHAR | 100 chars | User's full name | NOT NULL | "Ayush Sawant" |
+| email | VARCHAR | 120 chars | User's email address | UNIQUE, NOT NULL | "ayush@gmail.com" |
+| password | VARCHAR | 200 chars | Bcrypt-hashed password | NOT NULL | "$2b$12$..." |
+
+## **E.2 Expenses Table**
+
+| Field Name | Data Type | Size | Description | Constraints | Example |
+|-----------|-----------|------|-------------|-------------|---------|
+| id | SERIAL | 4 bytes | Auto-incrementing primary key | PK, NOT NULL | 1 |
+| user_id | INTEGER | 4 bytes | Foreign key referencing users | FK, NOT NULL | 1 |
+| title | VARCHAR | 100 chars | Expense description | NOT NULL | "Swiggy Order" |
+| amount | FLOAT | 8 bytes | Amount in INR | NOT NULL | 450.00 |
+| category | VARCHAR | 50 chars | Expense category | NOT NULL | "Food" |
+| date | TIMESTAMP | 8 bytes | Date and time of expense | DEFAULT NOW() | "2026-03-23 14:30:00" |
+| note | VARCHAR | 200 chars | Optional remarks | NULLABLE | "Lunch biryani" |
+
+## **E.3 Income Table**
+
+| Field Name | Data Type | Size | Description | Constraints | Example |
+|-----------|-----------|------|-------------|-------------|---------|
+| id | SERIAL | 4 bytes | Auto-incrementing primary key | PK, NOT NULL | 1 |
+| user_id | INTEGER | 4 bytes | Foreign key referencing users | FK, NOT NULL | 1 |
+| title | VARCHAR | 100 chars | Income description | NOT NULL | "March Salary" |
+| amount | FLOAT | 8 bytes | Amount in INR | NOT NULL | 58000.00 |
+| source | VARCHAR | 100 chars | Income source category | NULLABLE | "Salary" |
+| date | TIMESTAMP | 8 bytes | Date and time of income | DEFAULT NOW() | "2026-03-01 09:00:00" |
+
+## **E.4 Budgets Table**
+
+| Field Name | Data Type | Size | Description | Constraints | Example |
+|-----------|-----------|------|-------------|-------------|---------|
+| id | SERIAL | 4 bytes | Auto-incrementing primary key | PK, NOT NULL | 1 |
+| user_id | INTEGER | 4 bytes | Foreign key referencing users | FK, NOT NULL | 1 |
+| category | VARCHAR | 50 chars | Budget category | NOT NULL | "General" |
+| limit_amount | FLOAT | 8 bytes | Monthly budget cap in INR | NOT NULL | 30000.00 |
+| month | VARCHAR | 20 chars | Budget month in YYYY-MM format | NOT NULL | "2026-03" |
+
+## **E.5 Goals Table**
+
+| Field Name | Data Type | Size | Description | Constraints | Example |
+|-----------|-----------|------|-------------|-------------|---------|
+| id | SERIAL | 4 bytes | Auto-incrementing primary key | PK, NOT NULL | 1 |
+| user_id | INTEGER | 4 bytes | Foreign key referencing users | FK, NOT NULL | 1 |
+| name | VARCHAR | 100 chars | Goal name | NOT NULL | "Buy MacBook" |
+| target_amount | FLOAT | 8 bytes | Target savings in INR | NOT NULL | 70000.00 |
+| saved_amount | FLOAT | 8 bytes | Current saved amount | DEFAULT 0 | 18500.00 |
+| deadline | DATE | 4 bytes | Target completion date | NULLABLE | "2026-06-30" |
+
+---
+
+# **Appendix F: Frontend Page Components — Additional Code**
+
+---
+
+## **F.1 Landing Page (`LandingPage.tsx`)**
+
+The landing page features a typewriter effect, 3D perspective card tilt, starfield background, and multiple animated sections.
+
+```typescript
+// Custom useTypewriter Hook — creates a typing/erasing animation effect
+function useTypewriter(phrases: string[], typingSpeed = 100,
+                       erasingSpeed = 60, pauseTime = 2500) {
+  const [displayText, setDisplayText] = useState('');
+  const [phraseIndex, setPhraseIndex] = useState(0);
+  const [isTyping, setIsTyping] = useState(true);
+  const [isDeleting, setIsDeleting] = useState(false);
+
+  useEffect(() => {
+    let timeout: NodeJS.Timeout;
+    if (isTyping && !isDeleting) {
+      if (displayText.length < phrases[phraseIndex].length) {
+        timeout = setTimeout(() => {
+          setDisplayText(phrases[phraseIndex]
+            .substring(0, displayText.length + 1));
+        }, typingSpeed);
+      } else {
+        setIsTyping(false);
+        timeout = setTimeout(() => setIsDeleting(true), pauseTime);
+      }
+    } else if (isDeleting) {
+      if (displayText.length > 0) {
+        timeout = setTimeout(() => {
+          setDisplayText(displayText
+            .substring(0, displayText.length - 1));
+        }, erasingSpeed);
+      } else {
+        setIsDeleting(false);
+        setIsTyping(true);
+        setPhraseIndex((prev) => (prev + 1) % phrases.length);
+      }
+    }
+    return () => clearTimeout(timeout);
+  }, [displayText, isTyping, isDeleting, phraseIndex]);
+
+  return { displayText, phraseIndex, isTyping: !isDeleting };
+}
+```
+
+**3D Card Tilt Effect:**
+```typescript
+// Framer Motion spring-based 3D perspective tilt on mouse move
+const cardX = useMotionValue(0);
+const cardY = useMotionValue(0);
+const springCfg = { stiffness: 200, damping: 28 };
+const rotateX = useSpring(
+  useTransform(cardY, [-200, 200], [14, -14]), springCfg);
+const rotateY = useSpring(
+  useTransform(cardX, [-200, 200], [-14, 14]), springCfg);
+
+const onCardMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
+  const rect = e.currentTarget.getBoundingClientRect();
+  cardX.set(e.clientX - rect.left - rect.width / 2);
+  cardY.set(e.clientY - rect.top - rect.height / 2);
+};
+```
+
+**Landing Page Sections:**
+1. **Hero Section** — Typewriter heading with rotating phrases, CTA buttons, and a 3D perspective card showing a mock balance preview.
+2. **Why Choose Trackify?** — Three feature cards (Real-time Tracking, Visual Insights, Secure & Private) with scroll-triggered animations.
+3. **How It Works** — Three numbered steps (Sign Up, Log Expenses, See Progress) with viewport-based stagger animation.
+4. **Testimonials** — Three user testimonials with glassmorphism card styling.
+5. **Bottom CTA** — Final call-to-action with gradient background overlay.
+
+---
+
+## **F.2 Login Page (`LoginPage.tsx`)**
+
+The login page handles three authentication methods: email/password, Google OAuth, and demo mode activation.
+
+```typescript
+const handleGoogleSuccess = async (credentialResponse: any) => {
+  try {
+    setSubmitting(true);
+    setError('');
+    const res = await fetch(`${API_URL}/auth/google`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        credential: credentialResponse.credential
+      })
+    });
+    const data = await res.json();
+    if (data.token) {
+      loginWithGoogle(data.user, data.token);
+      navigate('/dashboard');
+    } else {
+      setError(data.error || 'Google login failed');
+    }
+  } catch (err) {
+    setError('Google login failed. Try again.');
+  } finally {
+    setSubmitting(false);
+  }
+};
+```
+
+**Login Flow:**
+1. User enters email + password → `POST /login` → JWT returned → stored in localStorage.
+2. User clicks Google Sign-In → Google credential received → `POST /auth/google` → JWT returned.
+3. User clicks "View Demo" → `activateDemo()` + `loadDemoData()` → redirect to Dashboard.
+
+---
+
+## **F.3 Dashboard Page (`DashboardPage.tsx`) — Key Features**
+
+The Dashboard is the most complex page (841 lines). Key features include:
+
+### **Animated Statistics Counter**
+```typescript
+function AnimatedStat({ value }: { value: number }) {
+  const nodeRef = useRef<HTMLParagraphElement | null>(null);
+  useEffect(() => {
+    const el = nodeRef.current;
+    if (!el) return;
+    const start = performance.now();
+    const duration = 900;
+    const to = value;
+    const step = (t: number) => {
+      const progress = Math.min(1, (t - start) / duration);
+      const current = to * progress;
+      el.textContent = `₹${current.toLocaleString('en-IN', {
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2
+      })}`;
+      if (progress < 1) requestAnimationFrame(step);
+    };
+    requestAnimationFrame(step);
+  }, [value]);
+  return <p ref={nodeRef} className="text-3xl font-mono font-extrabold" />;
+}
+```
+
+### **Excel Export Feature**
+```typescript
+const exportToExcel = () => {
+  const summary = [
+    ['Trackify — Monthly Report', ''],
+    ['Month', getMonthLabel()],
+    ['Generated On', new Date().toLocaleDateString('en-IN')],
+    ['', ''],
+    ['SUMMARY', ''],
+    ['Total Income', income],
+    ['Total Expenses', expenses],
+    ['Net Balance', netBalance],
+    ['Monthly Budget', currentBudgetAmount],
+    ['Savings Rate', `${savingsRate}%`],
+  ];
+  const transactionRows = [
+    ['Date', 'Description', 'Type', 'Category', 'Amount (₹)'],
+    ...monthlyTransactions.slice().reverse().map(t => [
+      t.date, t.description,
+      t.type === 'income' ? 'Income' : 'Expense',
+      t.category,
+      t.type === 'income' ? t.amount : -t.amount
+    ])
+  ];
+  const wb = XLSX.utils.book_new();
+  const summarySheet = XLSX.utils.aoa_to_sheet(summary);
+  XLSX.utils.book_append_sheet(wb, summarySheet, 'Summary');
+  const txSheet = XLSX.utils.aoa_to_sheet(transactionRows);
+  XLSX.utils.book_append_sheet(wb, txSheet, 'Transactions');
+  const excelBuffer = XLSX.write(wb, { bookType: 'xlsx', type: 'array' });
+  const blob = new Blob([excelBuffer],
+    { type: 'application/octet-stream' });
+  saveAs(blob, `Trackify_${currentMonth}.xlsx`);
+};
+```
+
+### **Investment Tier System**
+The dashboard dynamically categorizes users' savings into investment tiers and provides personalized investment suggestions.
+
+| Tier | Savings Range | Color | Suggestions |
+|------|--------------|-------|-------------|
+| No Savings | ₹0 or negative | Rose | Cut expenses, track spending, start emergency fund |
+| Starter | ₹1 – ₹2,000 | Amber | Digital gold, Recurring Deposit, round-up apps |
+| Growing | ₹2,000 – ₹5,000 | Amber | Mutual Fund SIP, Liquid Funds, PPF |
+| Moderate | ₹5,000 – ₹10,000 | Emerald | Index Funds, US ETFs, Fixed Deposits |
+| Strong | ₹10,000 – ₹25,000 | Emerald | Diversified portfolio, blue chips, NPS Pension |
+| Excellent | Above ₹25,000 | Emerald | REITs, 6-month emergency fund, ELSS |
+
+---
+
+## **F.4 Chart Component (`ChartComponent.tsx`)**
+
+Uses Recharts (PieChart + BarChart) for interactive financial analytics:
+
+```typescript
+import { PieChart, Pie, Cell, ResponsiveContainer,
+         BarChart, Bar, XAxis, YAxis, CartesianGrid,
+         Tooltip, Legend } from 'recharts';
+
+const COLORS = [
+  '#8b5cf6', '#3b82f6', '#f59e0b', '#10b981',
+  '#ec4899', '#f43f5e', '#06b6d4', '#f97316'
+];
+
+// Aggregate expense data for Pie Chart
+const dataForPieChart = transactions.reduce((acc, t) => {
+  if (t.type === 'expense') {
+    const existing = acc.find(item => item.name === t.category);
+    if (existing) existing.value += t.amount;
+    else acc.push({ name: t.category, value: t.amount });
+  }
+  return acc;
+}, [] as { name: string; value: number }[]);
+
+// Aggregate monthly data for Bar Chart
+const monthlyData = transactions.reduce((acc, t) => {
+  const month = t.date.substring(0, 7);
+  if (!acc[month]) acc[month] = { month, income: 0, expenses: 0 };
+  if (t.type === 'income') acc[month].income += t.amount;
+  else acc[month].expenses += t.amount;
+  return acc;
+}, {} as Record<string, { month: string; income: number;
+                          expenses: number }>);
+```
+
+**Chart Features:**
+- **Donut Pie Chart** — Shows expense distribution by category with inner/outer radius and 8° padding.
+- **Stacked Bar Chart** — Shows income vs. expenses over time with gradient fills.
+- **Custom Tooltip** — Theme-aware tooltip with glassmorphism styling.
+- **Responsive** — Uses `ResponsiveContainer` for automatic size adjustment.
+- **Empty State** — Displays a placeholder message when no transactions exist.
+
+---
+
+## **F.5 Navbar Component (`Navbar.tsx`)**
+
+The navigation component features:
+
+1. **Responsive Design** — Desktop horizontal links, mobile hamburger menu with animated dropdown.
+2. **Active State Highlighting** — Current route gets a violet background and underline.
+3. **Theme Toggle Button** — Animated sun/moon icon swap using `AnimatePresence` with spring physics.
+4. **Context Awareness** — Shows different navigation based on auth state (logged in vs. guest).
+
+```typescript
+const ThemeToggleButton = () => {
+  const { theme, setTheme } = useTheme();
+  const isDark = theme === 'dark';
+
+  return (
+    <motion.button
+      whileTap={{ scale: 0.80 }}
+      whileHover={{ scale: 1.1 }}
+      onClick={() => setTheme(isDark ? 'light' : 'dark')}
+      style={{
+        width: '42px', height: '42px', borderRadius: '50%',
+        background: isDark
+          ? 'rgba(255,255,255,0.08)'
+          : 'rgba(0,0,0,0.06)',
+        border: isDark
+          ? '1px solid rgba(255,255,255,0.15)'
+          : '1px solid rgba(0,0,0,0.12)',
+      }}
+    >
+      <AnimatePresence mode="wait" initial={false}>
+        {isDark ? (
+          <motion.div
+            key="moon"
+            initial={{ y: 20, opacity: 0, rotate: -30 }}
+            animate={{ y: 0, opacity: 1, rotate: 0 }}
+            exit={{ y: -20, opacity: 0, rotate: 30 }}
+            transition={{ type: 'spring', stiffness: 300, damping: 20 }}
+          >
+            <Moon className="w-5 h-5" style={{ color: '#c4b5fd' }} />
+          </motion.div>
+        ) : (
+          <motion.div key="sun" /* similar animation */ >
+            <Sun className="w-5 h-5" style={{ color: '#fbbf24' }} />
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </motion.button>
+  );
+};
+```
+
+---
+
+# **Appendix G: Deployment Guide**
+
+---
+
+## **G.1 Local Development Setup**
+
+### **Step 1: Clone the Repository**
+```bash
+git clone https://github.com/ayushsawant3478/Expense_tracker.git
+cd Expense_tracker
+```
+
+### **Step 2: Backend Setup**
+```bash
+cd expense-tracker-backend
+python3 -m venv venv
+source venv/bin/activate        # macOS/Linux
+# venv\Scripts\activate         # Windows
+pip install -r requirements.txt
+```
+
+Create `.env` file:
+```env
+DATABASE_URL=postgresql://user:password@host/database?sslmode=require
+SECRET_KEY=your_flask_secret_key
+JWT_SECRET_KEY=your_jwt_signing_key
+GOOGLE_CLIENT_ID=your_google_client_id.apps.googleusercontent.com
+```
+
+Run the backend:
+```bash
+python app.py
+# Server starts at http://localhost:8000
+```
+
+### **Step 3: Frontend Setup**
+```bash
+cd frontend
+npm install
+```
+
+Create `.env` file:
+```env
+VITE_API_URL=http://127.0.0.1:8000
+VITE_GEMINI_API_KEY=your_gemini_api_key
+VITE_GOOGLE_CLIENT_ID=your_google_client_id.apps.googleusercontent.com
+```
+
+Run the frontend:
+```bash
+npm run dev
+# Server starts at http://localhost:3000
+```
+
+## **G.2 Production Deployment**
+
+### **Backend → Render**
+
+1. Create a new **Web Service** on Render.
+2. Connect GitHub repository.
+3. Set:
+   - **Root Directory:** `expense-tracker-backend`
+   - **Build Command:** `pip install -r requirements.txt`
+   - **Start Command:** `gunicorn app:app`
+4. Add environment variables (DATABASE_URL, SECRET_KEY, JWT_SECRET_KEY, GOOGLE_CLIENT_ID).
+5. Deploy.
+
+### **Frontend → Vercel**
+
+1. Import GitHub repository on Vercel.
+2. Set:
+   - **Root Directory:** `frontend`
+   - **Framework Preset:** Vite
+   - **Build Command:** `npm run build`
+   - **Output Directory:** `dist`
+3. Add environment variables (VITE_API_URL, VITE_GEMINI_API_KEY, VITE_GOOGLE_CLIENT_ID).
+4. Deploy.
+
+### **Database → Neon**
+
+1. Create a new Neon project.
+2. Copy the connection string.
+3. Set `DATABASE_URL` in Render's environment variables.
+4. Tables are auto-created on first backend startup.
+
+## **G.3 Deployment Architecture Diagram**
+
+```mermaid
+graph LR
+    subgraph Client
+        A["User Browser"]
+    end
+
+    subgraph Vercel Cloud
+        B["React SPA (Vite Build)"]
+        C["Vercel CDN (Edge)"]
+    end
+
+    subgraph Render Cloud
+        D["Flask + Gunicorn"]
+        E["ThreadPoolExecutor"]
+    end
+
+    subgraph Neon Cloud
+        F[("PostgreSQL DB")]
+    end
+
+    subgraph External APIs
+        G["Yahoo Finance"]
+        H["MFAPI"]
+        I["Google Gemini AI"]
+        J["Google OAuth 2.0"]
+    end
+
+    A -->|HTTPS| C
+    C -->|Static Assets| B
+    A -->|API Calls| D
+    D -->|SQL| F
+    E -->|HTTP| G
+    E -->|HTTP| H
+    A -->|SDK| I
+    A -->|OAuth| J
+    D -->|Token Verify| J
+```
+
+---
+
+# **Appendix H: User Manual**
+
+---
+
+## **H.1 Getting Started**
+
+### **Registration**
+1. Navigate to the Trackify landing page.
+2. Click **"Get Started Free"** or **"Register"**.
+3. Enter your **Name**, **Email Address**, and create a **Password**.
+4. Click **"Register"** — you will be automatically logged in and redirected to the Dashboard.
+
+### **Login**
+1. Navigate to the Login page.
+2. Enter your registered **Email** and **Password**, then click **"Sign In"**.
+3. Alternatively, click **"Sign in with Google"** for one-click OAuth login.
+
+### **Demo Mode**
+1. Click **"View Demo"** or **"Try Demo"** from the Landing or Login page.
+2. You will be logged in as "Demo User" with pre-loaded mock transactions and goals.
+3. All features are fully functional in demo mode. Data is not saved to the server.
+
+## **H.2 Adding Transactions**
+
+### **Quick Add (Dashboard)**
+1. On the Dashboard, scroll to the **"Quick Add Transaction"** section.
+2. Toggle between **Expense** and **Income** tabs.
+3. Fill in the **Title** (e.g., "Swiggy Order"), **Amount** (e.g., 450), and select a **Category**.
+4. Click **"Add Expense"** or **"Add Income"**.
+5. The transaction list and charts update automatically.
+
+### **Full Page Editor**
+1. Navigate to **Add Transaction** from the Navbar or click **"Full Page Editor"** on the Dashboard.
+2. Select transaction type, fill in details, and submit.
+
+### **Auto-Categorization**
+- When you type a description like "Swiggy biryani" or "IRCTC ticket", the system automatically suggests a category (Food, Travel, etc.) based on keyword matching.
+- You can override the suggestion by selecting a different category manually.
+
+## **H.3 Managing Budgets**
+
+1. On the Dashboard, find the **"Monthly Budget"** section.
+2. Click the **pencil icon** to edit.
+3. Enter your monthly budget limit in INR and click **"Save"**.
+4. The progress bar shows spending as a percentage of the budget.
+5. If spending exceeds the budget, a **red alert banner** appears at the top of the Dashboard.
+
+## **H.4 Savings Goals**
+
+1. Scroll to the **"🎯 Savings Goals"** section on the Dashboard, or navigate to the **Goals** page.
+2. Click **"+ Add Goal"** to create a new goal.
+3. Enter the **Goal Name** (e.g., "Buy Laptop"), **Target Amount** (e.g., ₹70,000), and optionally a **Deadline**.
+4. To add money to a goal, click the **"+ Add ₹"** button on the goal card.
+5. Progress bars update in real-time.
+6. Goals are color-coded: **Green** (on track), **Red** (overdue).
+
+## **H.5 Analytics**
+
+1. Navigate to the **Analytics** page from the Navbar.
+2. View:
+   - **Total Income** for the current month.
+   - **Total Expenses** for the current month.
+   - **Top Spending Category** with amount.
+3. Interactive charts:
+   - **Donut Chart** — Expense distribution by category (hover for details).
+   - **Bar Chart** — Income vs. Expenses over time.
+
+## **H.6 Live Market Data**
+
+1. Market data is displayed on the **Dashboard** and the **Investments** page.
+2. Data is fetched in real-time from Yahoo Finance and MFAPI.
+3. Categories displayed:
+   - **Indices:** Nifty 50, Sensex
+   - **Stocks:** Reliance, TCS, HDFC Bank, Infosys, ICICI Bank
+   - **Mutual Funds:** Mirae Asset, Axis Bluechip, Parag Parikh, SBI Small Cap, Motilal Oswal Nasdaq
+   - **Gold:** International Gold rate
+   - **ELSS Tax-Saving Funds:** Mirae Asset ELSS, DSP Tax Saver
+   - **REITs:** Embassy, Mindspace
+4. Each card shows the **current price**, **change (₹)**, and **change (%)**. Green = up, Red = down.
+5. The data shown adapts based on the user's **savings tier** (users with higher savings see more investment options).
+
+## **H.7 AI Financial Chatbot**
+
+1. Click the **floating chatbot icon** (🤖) at the bottom-right corner of the Dashboard.
+2. Type a financial question, e.g.:
+   - "How much did I spend on food this month?"
+   - "Am I on track to meet my savings goal?"
+   - "What's a good investment strategy with ₹10,000/month?"
+3. The chatbot has access to your **actual financial data** (income, expenses, savings, goals) and provides personalized advice.
+4. Powered by **Google Gemini AI** with a custom financial advisor persona.
+
+## **H.8 Exporting Data**
+
+1. On the Dashboard, click the **"Export Excel"** button in the header.
+2. A `.xlsx` file is generated with two sheets:
+   - **Summary** — Monthly totals (income, expenses, net balance, budget, savings rate).
+   - **Transactions** — Full transaction list with date, description, type, category, and amount.
+3. The file is automatically downloaded to your device.
+
+## **H.9 Theme Settings**
+
+1. Click the **sun/moon icon** in the Navbar.
+2. The theme toggles between **Dark Mode** (default with glassmorphism effects) and **Light Mode**.
+3. Your preference is saved in `localStorage` and persists across sessions.
+
+---
+
+# **Appendix I: Testing Documentation**
+
+---
+
+## **I.1 Testing Methodology**
+
+Due to the project timeline, formal automated tests were not implemented. Instead, **manual functional testing** and **API testing** (using Postman) were conducted comprehensively.
+
+## **I.2 API Test Cases (Postman)**
+
+| Test ID | Endpoint | Method | Test Description | Expected Result | Status |
+|---------|----------|--------|-----------------|-----------------|--------|
+| T-01 | `/register` | POST | Register with valid data | 201 + success message | ✅ Pass |
+| T-02 | `/register` | POST | Register with duplicate email | Error response | ✅ Pass |
+| T-03 | `/login` | POST | Login with valid credentials | 200 + JWT token | ✅ Pass |
+| T-04 | `/login` | POST | Login with wrong password | 401 "Invalid credentials" | ✅ Pass |
+| T-05 | `/login` | POST | Login with non-existent email | 401 "Invalid credentials" | ✅ Pass |
+| T-06 | `/auth/google` | POST | Google OAuth with valid token | 200 + JWT token | ✅ Pass |
+| T-07 | `/auth/google` | POST | Google OAuth with invalid token | 400 + error | ✅ Pass |
+| T-08 | `/expenses` | POST | Add expense with valid JWT | 201 + success message | ✅ Pass |
+| T-09 | `/expenses` | POST | Add expense without JWT | 401 Unauthorized | ✅ Pass |
+| T-10 | `/expenses` | GET | Fetch expenses with JWT | 200 + expense array | ✅ Pass |
+| T-11 | `/expenses/:id` | DELETE | Delete existing expense | 200 + success message | ✅ Pass |
+| T-12 | `/expenses/categorize` | POST | Categorize "Swiggy order" | `{ "category": "Food" }` | ✅ Pass |
+| T-13 | `/expenses/categorize` | POST | Categorize "Unknown item" | `{ "category": "Other" }` | ✅ Pass |
+| T-14 | `/income` | POST | Add income with valid JWT | 201 + success message | ✅ Pass |
+| T-15 | `/income` | GET | Fetch income records | 200 + income array | ✅ Pass |
+| T-16 | `/income/categorize` | POST | Categorize "Monthly salary" | `{ "source": "Salary" }` | ✅ Pass |
+| T-17 | `/budget` | POST | Set budget for new month | 201 + success message | ✅ Pass |
+| T-18 | `/budget` | POST | Update budget for existing month | 201 + updated | ✅ Pass |
+| T-19 | `/budget` | GET | Fetch budgets | 200 + budget array | ✅ Pass |
+| T-20 | `/goals` | POST | Create new savings goal | 201 + success message | ✅ Pass |
+| T-21 | `/goals/:id` | PUT | Update goal savings | 200 + success message | ✅ Pass |
+| T-22 | `/goals/:id` | DELETE | Delete goal | 200 + success message | ✅ Pass |
+| T-23 | `/goals` | GET | Fetch all goals | 200 + goal array | ✅ Pass |
+| T-24 | `/market/all` | GET | Fetch all market data | 200 + categorized payload | ✅ Pass |
+| T-25 | `/market/indices` | GET | Fetch index data only | 200 + indices array | ✅ Pass |
+| T-26 | `/` | GET | Health check | 200 "Backend is running 🚀" | ✅ Pass |
+
+## **I.3 UI/UX Test Cases**
+
+| Test ID | Test Description | Expected Behavior | Status |
+|---------|-----------------|-------------------|--------|
+| U-01 | Register with valid data | Redirect to Dashboard after auto-login | ✅ Pass |
+| U-02 | Login with valid data | Redirect to Dashboard with welcome banner | ✅ Pass |
+| U-03 | Google Sign-In | OAuth popup → successful redirect | ✅ Pass |
+| U-04 | Demo Mode activation | Load mock data, navigate to Dashboard | ✅ Pass |
+| U-05 | Dark/Light theme toggle | Smooth animated transition, preference saved | ✅ Pass |
+| U-06 | Add expense from Dashboard | Transaction appears in list, charts update | ✅ Pass |
+| U-07 | Delete transaction | Transaction removed, totals recalculated | ✅ Pass |
+| U-08 | Set monthly budget | Budget bar and percentage update correctly | ✅ Pass |
+| U-09 | Exceed budget | Red alert banner appears | ✅ Pass |
+| U-10 | Create savings goal | Goal card appears with progress bar at 0% | ✅ Pass |
+| U-11 | Add money to goal | Progress bar fills, percentage updates | ✅ Pass |
+| U-12 | Complete a goal | Progress reaches 100%, completion indicator shown | ✅ Pass |
+| U-13 | Navigate months (← →) | Transactions filter to selected month | ✅ Pass |
+| U-14 | Export to Excel | .xlsx file downloaded with correct data | ✅ Pass |
+| U-15 | AI Chatbot interaction | Response received with financial context | ✅ Pass |
+| U-16 | Live market data load | Cards display with prices and change values | ✅ Pass |
+| U-17 | Responsive design (mobile) | Hamburger menu, stacked cards, readable text | ✅ Pass |
+| U-18 | Responsive design (tablet) | 2-column grid, proper spacing | ✅ Pass |
+| U-19 | Logout | Session cleared, redirect to Landing page | ✅ Pass |
+| U-20 | Analytics page | Pie and Bar charts render with correct data | ✅ Pass |
+
+## **I.4 Cross-Browser Compatibility**
+
+| Browser | Version | Status |
+|---------|---------|--------|
+| Google Chrome | 120+ | ✅ Fully Compatible |
+| Mozilla Firefox | 120+ | ✅ Fully Compatible |
+| Apple Safari | 16+ | ✅ Fully Compatible |
+| Microsoft Edge | 120+ | ✅ Fully Compatible |
+| Chrome (Android) | 120+ | ✅ Responsive & Functional |
+| Safari (iOS) | 16+ | ✅ Responsive & Functional |
+
+---
+
+# **Appendix J: Project Directory Structure**
+
+```
+Expense_tracker/
+├── expense-tracker-backend/
+│   ├── app.py                    # Flask entry point
+│   ├── config.py                 # Configuration (env vars)
+│   ├── requirements.txt          # Python dependencies
+│   ├── database/
+│   │   └── db.py                 # PostgreSQL connection
+│   ├── models/
+│   │   ├── user.py               # Users table model
+│   │   ├── expense.py            # Expenses table model
+│   │   ├── income.py             # Income table model
+│   │   ├── budget.py             # Budgets table model
+│   │   └── goal.py               # Goals table model
+│   ├── routes/
+│   │   ├── auth_routes.py        # Auth endpoints
+│   │   ├── expense_routes.py     # Expense endpoints
+│   │   ├── income_routes.py      # Income endpoints
+│   │   ├── budget_routes.py      # Budget endpoints
+│   │   ├── goal_routes.py        # Goal endpoints
+│   │   └── market_routes.py      # Market data endpoints
+│   └── utils/
+│       └── categorizer.py        # Auto-categorization engine
+│
+├── frontend/
+│   ├── package.json              # Node.js dependencies
+│   ├── vite.config.ts            # Vite configuration
+│   ├── vercel.json               # Vercel deployment config
+│   ├── index.html                # HTML entry point
+│   └── src/
+│       ├── main.tsx              # React entry point
+│       ├── App.tsx               # Router + providers
+│       ├── constants.ts          # App-wide constants
+│       ├── types.ts              # TypeScript interfaces
+│       ├── index.css             # Global styles + themes
+│       ├── context/
+│       │   ├── AuthContext.tsx    # Authentication state
+│       │   ├── ExpenseContext.tsx # Transaction/budget state
+│       │   ├── GoalContext.tsx    # Savings goal state
+│       │   └── ThemeContext.tsx   # Theme state
+│       ├── components/
+│       │   ├── Navbar.tsx         # Navigation bar
+│       │   ├── ChatBot.tsx        # AI chatbot widget
+│       │   ├── ChartComponent.tsx # Recharts visualization
+│       │   ├── ExpenseForm.tsx    # Expense entry form
+│       │   ├── IncomeForm.tsx     # Income entry form
+│       │   ├── GoalTracker.tsx    # Goal management cards
+│       │   ├── LiveMarketData.tsx # Market data display
+│       │   ├── Header.tsx         # Page headers
+│       │   ├── Footer.tsx         # Page footer
+│       │   └── StarfieldBackground.tsx # Canvas animation
+│       └── pages/
+│           ├── LandingPage.tsx    # Public landing page
+│           ├── LoginPage.tsx      # Login form
+│           ├── RegisterPage.tsx   # Registration form
+│           ├── DashboardPage.tsx  # Main dashboard (841 lines)
+│           ├── TransactionsPage.tsx # Transaction list
+│           ├── AnalyticsPage.tsx  # Charts & insights
+│           ├── BudgetPage.tsx     # Budget management
+│           ├── GoalsPage.tsx      # Savings goals
+│           ├── InvestmentsPage.tsx # Market data view
+│           ├── ProfilePage.tsx    # User profile
+│           ├── AddTransactionPage.tsx # Transaction form
+│           └── NotFoundPage.tsx   # 404 page
+│
+├── Trackify_Blackbook.md         # This document
+├── AGENTS.md                     # Project documentation
+└── .gitignore                    # Git ignore rules
+```
+
+---
+
+# **Appendix K: Glossary**
+
+| Term | Definition |
+|------|-----------|
+| **JWT** | JSON Web Token — a compact, URL-safe means of representing claims transferred between two parties |
+| **OAuth 2.0** | An authorization framework that enables third-party applications to access user accounts |
+| **bcrypt** | A password hashing function designed to resist brute-force attacks via configurable work factor |
+| **SPA** | Single Page Application — a web app that loads a single HTML page and dynamically updates content |
+| **REST API** | Representational State Transfer — an architectural style for distributed hypermedia systems |
+| **CORS** | Cross-Origin Resource Sharing — a mechanism that allows restricted resources on a web page to be requested from another domain |
+| **WSGI** | Web Server Gateway Interface — a specification for a universal interface between web servers and web applications in Python |
+| **NAV** | Net Asset Value — the per-unit value of a mutual fund, calculated daily |
+| **SIP** | Systematic Investment Plan — a method of investing a fixed sum regularly in a mutual fund |
+| **ELSS** | Equity-Linked Savings Scheme — a type of mutual fund that offers tax deduction under Section 80C of the Income Tax Act |
+| **REIT** | Real Estate Investment Trust — a company that owns or finances income-producing real estate |
+| **Nifty 50** | NSE's benchmark index comprising 50 of the largest Indian stocks |
+| **Sensex** | BSE's benchmark index comprising 30 of the largest Indian stocks |
+| **Glassmorphism** | A UI design trend featuring frosted glass-like elements with transparency and blur effects |
+| **HMR** | Hot Module Replacement — a Vite/Webpack feature that updates modules in the browser without a full page reload |
+| **CDN** | Content Delivery Network — a geographically distributed group of servers that cache content closer to users |
+| **SSR** | Server-Side Rendering — rendering web pages on the server before sending to the client |
+| **Gunicorn** | Green Unicorn — a Python WSGI HTTP Server for UNIX, used to serve Flask applications in production |
+| **psycopg2** | The most popular PostgreSQL database adapter for Python |
+| **ThreadPoolExecutor** | A Python concurrent.futures executor that uses a pool of threads to execute tasks asynchronously |
+| **localStorage** | A web storage API that allows JavaScript to store key-value pairs in the browser with no expiration |
+
+---
+
+*End of Expanded Trackify Blackbook*
+
+---
+
+> **Total Chapters:** 6 + 11 Appendices (A through K)
 >
-> **Total Pages:** ~60+
+> **Document generated on:** March 24, 2026
 >
 > **Prepared by:** Ayush Sawant
 >

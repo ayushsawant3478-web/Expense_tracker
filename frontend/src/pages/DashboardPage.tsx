@@ -783,14 +783,45 @@ export default function DashboardPage() {
               <ChartComponent transactions={monthlyTransactions} />
             </section>
 
-            <section className="glass-card p-8 rounded-[32px]" style={{ background: 'var(--bg-card)', border: '1px solid var(--border-card)' }}>
+            <section className="glass-card p-8 rounded-[32px] overflow-hidden" style={{ background: 'var(--bg-card)', border: '1px solid var(--border-card)' }}>
               <div className="flex items-center justify-between mb-8">
-                <h2 className="text-xl font-bold">Transactions — {getMonthLabel()}</h2>
-                <span className="text-sm font-medium" style={{ color: 'var(--text-secondary)' }}>{monthlyTransactions.length} total</span>
+                <div className="flex items-center gap-3">
+                  <h2 className="text-xl font-bold">Recent Transactions</h2>
+                  <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-violet-500/10 text-violet-400 border border-violet-500/20">
+                    {getMonthLabel()}
+                  </span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <button 
+                    onClick={() => {
+                      const el = document.getElementById('transaction-slider');
+                      if (el) el.scrollBy({ left: -300, behavior: 'smooth' });
+                    }}
+                    className="p-2 rounded-xl hover:bg-white/5 transition-colors border border-white/5"
+                    style={{ color: 'var(--text-secondary)' }}
+                  >
+                    <ChevronLeft className="w-5 h-5" />
+                  </button>
+                  <button 
+                    onClick={() => {
+                      const el = document.getElementById('transaction-slider');
+                      if (el) el.scrollBy({ left: 300, behavior: 'smooth' });
+                    }}
+                    className="p-2 rounded-xl hover:bg-white/5 transition-colors border border-white/5"
+                    style={{ color: 'var(--text-secondary)' }}
+                  >
+                    <ChevronRight className="w-5 h-5" />
+                  </button>
+                </div>
               </div>
-              <div className="space-y-4">
+
+              <div 
+                id="transaction-slider"
+                className="flex gap-4 overflow-x-auto pb-4 no-scrollbar scroll-smooth snap-x snap-mandatory"
+                style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
+              >
                 {monthlyTransactions.length === 0 ? (
-                  <div className="text-center py-12" style={{ color: 'var(--text-secondary)' }}>
+                  <div className="w-full text-center py-12" style={{ color: 'var(--text-secondary)' }}>
                     <Wallet className="w-12 h-12 mx-auto mb-4 opacity-20" />
                     <p>No transactions for {getMonthLabel()}.</p>
                   </div>
@@ -798,35 +829,44 @@ export default function DashboardPage() {
                   monthlyTransactions.slice().reverse().map((t) => (
                     <motion.div
                       layout
-                      initial={{ opacity: 0, x: -20 }}
-                      animate={{ opacity: 1, x: 0 }}
+                      initial={{ opacity: 0, scale: 0.95 }}
+                      animate={{ opacity: 1, scale: 1 }}
                       key={`${t.type}-${t.id}`}
-                      className="group p-4 rounded-2xl flex items-center justify-between transition-all"
-                      style={{ background: 'rgba(255,255,255,0.03)' }}
+                      className="flex-shrink-0 w-[280px] snap-start p-6 rounded-[24px] transition-all relative group"
+                      style={{ 
+                        background: 'rgba(255,255,255,0.03)', 
+                        border: '1px solid var(--border-card)',
+                        boxShadow: '0 8px 32px rgba(0,0,0,0.1)'
+                      }}
                     >
-                      <div className="flex items-center gap-4">
+                      <div className="flex items-center justify-between mb-4">
                         <div
-                          className={`w-12 h-12 rounded-[14px] flex items-center justify-center ${t.type === 'income' ? 'bg-emerald-500/10 text-emerald-400' : 'bg-rose-500/10 text-rose-400'}`}
-                          style={{ boxShadow: t.type === 'income' ? '0 0 12px rgba(16,185,129,0.25)' : '0 0 12px rgba(244,63,94,0.25)' }}
+                          className={`w-12 h-12 rounded-[16px] flex items-center justify-center ${t.type === 'income' ? 'bg-emerald-500/10 text-emerald-400' : 'bg-rose-500/10 text-rose-400'}`}
+                          style={{ boxShadow: t.type === 'income' ? '0 0 12px rgba(16,185,129,0.15)' : '0 0 12px rgba(244,63,94,0.15)' }}
                         >
                           {t.type === 'income' ? <Plus className="w-6 h-6" /> : <Minus className="w-6 h-6" />}
                         </div>
-                        <div>
-                          <p className="text-[15px] font-medium" style={{ color: 'var(--text-primary)' }}>{t.description}</p>
-                          <p className="text-[13px]" style={{ color: 'var(--text-secondary)' }}>{t.date} • {t.category}</p>
-                        </div>
-                      </div>
-                      <div className="flex items-center gap-6">
-                        <p className={`font-mono font-bold text-lg ${t.type === 'income' ? 'text-emerald-500' : 'text-rose-500'}`}>
+                        <p className={`font-mono font-bold text-xl ${t.type === 'income' ? 'text-emerald-500' : 'text-rose-500'}`}>
                           {t.type === 'income' ? '+' : '-'}₹{t.amount.toLocaleString('en-IN')}
                         </p>
-                        <button
-                          onClick={() => deleteTransaction(t.id)}
-                          className="opacity-0 group-hover:opacity-100 p-2 text-slate-500 hover:text-rose-500 transition-all"
-                        >
-                          <Trash2 className="w-5 h-5" />
-                        </button>
                       </div>
+
+                      <div className="space-y-1">
+                        <p className="text-[15px] font-bold line-clamp-1" style={{ color: 'var(--text-primary)' }}>{t.description}</p>
+                        <div className="flex items-center gap-2">
+                          <span className="px-2 py-0.5 rounded-md text-[10px] font-bold uppercase tracking-wider bg-white/5" style={{ color: 'var(--text-secondary)' }}>
+                            {t.category}
+                          </span>
+                          <span className="text-[11px]" style={{ color: 'var(--text-secondary)' }}>{t.date}</span>
+                        </div>
+                      </div>
+
+                      <button
+                        onClick={() => deleteTransaction(t.id)}
+                        className="absolute top-4 right-4 opacity-0 group-hover:opacity-100 p-2 text-slate-500 hover:text-rose-500 transition-all bg-white/5 rounded-xl backdrop-blur-sm"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </button>
                     </motion.div>
                   ))
                 )}

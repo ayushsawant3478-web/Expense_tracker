@@ -50,3 +50,12 @@ body {
   background: var(--bg-card);
   border: 1px solid var(--border-card);
 }
+
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}

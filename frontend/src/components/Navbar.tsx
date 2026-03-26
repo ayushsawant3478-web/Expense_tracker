@@ -2,10 +2,11 @@ import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useExpense } from '../context/ExpenseContext';
 import { useGoal } from '../context/GoalContext';
-import { LogOut, Menu, X, Moon, Sun, Wallet } from 'lucide-react';
+import { LogOut, Menu, X, Moon, Sun, Wallet, Plus } from 'lucide-react';
 import { useTheme } from '../context/ThemeContext';
 import { motion, AnimatePresence } from 'motion/react';
 import { useState } from 'react';
+import TransactionModal from './TransactionModal';
 
 const ThemeToggleButton = () => {
   const { theme, setTheme } = useTheme();
@@ -75,6 +76,7 @@ export default function Navbar() {
   const navigate = useNavigate();
   const location = useLocation();
   const [menuOpen, setMenuOpen] = useState(false);
+  const [isTransactionModalOpen, setIsTransactionModalOpen] = useState(false);
 
   const handleLogout = () => {
     logout();
@@ -135,6 +137,16 @@ export default function Navbar() {
 
           {/* Right Side */}
           <div className="flex items-center gap-3">
+            {user || isDemo ? (
+              <button
+                onClick={() => setIsTransactionModalOpen(true)}
+                className="flex items-center gap-2 px-4 py-2 bg-violet-600 text-white text-sm font-bold rounded-xl hover:bg-violet-500 transition-all shadow-lg shadow-violet-500/20 mr-2"
+              >
+                <Plus className="w-4 h-4" />
+                <span className="hidden sm:inline">Quick Add</span>
+              </button>
+            ) : null}
+
             <ThemeToggleButton />
 
             {user || isDemo ? (
@@ -261,6 +273,11 @@ export default function Navbar() {
           </motion.div>
         )}
       </AnimatePresence>
+
+      <TransactionModal 
+        isOpen={isTransactionModalOpen} 
+        onClose={() => setIsTransactionModalOpen(false)} 
+      />
     </>
   );
 }

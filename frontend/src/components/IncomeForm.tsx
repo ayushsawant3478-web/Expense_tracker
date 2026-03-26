@@ -2,9 +2,14 @@ import { useState, FormEvent, useEffect } from 'react';
 import { useExpense } from '../context/ExpenseContext';
 import { INCOME_SOURCES, API_URL } from '../constants';
 import { motion } from 'motion/react';
-import { RefreshCw } from 'lucide-react';
+import { RefreshCw, Plus } from 'lucide-react';
+import Toast from './Toast';
 
-export default function IncomeForm() {
+interface Props {
+  onSuccess?: () => void;
+}
+
+export default function IncomeForm({ onSuccess }: Props) {
   const [description, setDescription] = useState('');
   const [amount, setAmount] = useState<number>(0);
   const [source, setSource] = useState(INCOME_SOURCES[0]);
@@ -13,6 +18,7 @@ export default function IncomeForm() {
   const [autoDetected, setAutoDetected] = useState(false);
   const [detecting, setDetecting] = useState(false);
   const [descTimer, setDescTimer] = useState<number | undefined>(undefined);
+  const [showToast, setShowToast] = useState(false);
 
   useEffect(() => {
     if (descTimer) {
@@ -56,82 +62,86 @@ export default function IncomeForm() {
     });
     setDescription('');
     setAmount(0);
+    setShowToast(true);
+    if (onSuccess) {
+      setTimeout(onSuccess, 500); // Small delay before closing modal
+    }
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4">
-      <div>
-        <label className="block text-sm font-medium mb-1.5 ml-1" style={{ color: 'var(--text-secondary)' }}>Description</label>
-        <input
-          type="text"
-          value={description}
-          onChange={(e) => setDescription(e.target.value)}
-          required
-          className="w-full rounded-2xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-violet-500/50 focus:border-violet-500 transition-all apple-input"
-          style={{ background: 'var(--bg-input)', border: '1px solid var(--border-input)', color: 'var(--text-primary)' }}
-          placeholder="e.g. Monthly Salary"
-        />
-      </div>
-      <div className="grid grid-cols-2 gap-4">
-        <div>
-          <label className="block text-sm font-medium mb-1.5 ml-1" style={{ color: 'var(--text-secondary)' }}>Amount (₹)</label>
-          <input
-            type="number"
-            value={amount || ''}
-            onChange={(e) => setAmount(parseFloat(e.target.value))}
-            required
-            min="0.01"
-            step="0.01"
-            className="w-full rounded-2xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-violet-500/50 focus:border-violet-500 transition-all font-mono apple-input"
-            style={{ background: 'var(--bg-input)', border: '1px solid var(--border-input)', color: 'var(--text-primary)' }}
-            placeholder="0.00"
-          />
-        </div>
-        <div>
-          <label className="block text-sm font-medium mb-1.5 ml-1" style={{ color: 'var(--text-secondary)' }}>Source</label>
-          <div className="relative">
-            <select
-            value={source}
-            onChange={(e) => { setSource(e.target.value); setAutoDetected(false); }}
-            className="w-full rounded-2xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-violet-500/50 focus:border-violet-500 transition-all apple-input"
-            style={{ background: 'var(--bg-input)', border: '1px solid var(--border-input)', color: 'var(--text-primary)' }}
-          >
-            {INCOME_SOURCES.map(src => (
-              <option key={src} value={src} className="bg-slate-900">{src}</option>
-            ))}
-            </select>
-            {detecting && (
-              <RefreshCw className="w-4 h-4 absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 animate-spin" />
-            )}
+    <>
+      <Toast 
+        show={showToast} 
+        message="Income added successfully! 💰" 
+        onClose={() => setShowToast(false)} 
+      />
+      <form onSubmit={handleSubmit} className="space-y-6">
+        <div className="space-y-4">
+          <div>
+            <label className="text-xs font-bold uppercase tracking-wider mb-2 block opacity-50 ml-1">Description</label>
+            <div className="relative group">
+              <input
+                type="text"
+                value={description}
+                onChange={(e) => setDescription(e.target.value)}
+                className="w-full rounded-2xl px-5 py-4 focus:outline-none focus:ring-2 focus:ring-violet-500/50 transition-all group-hover:border-violet-500/30"
+                style={{ background: 'var(--bg-input)', border: '1px solid var(--border-input)', color: 'var(--text-primary)' }}
+                placeholder="e.g. Monthly Salary"
+                required
+              />
+              {detecting && (
+                <RefreshCw className="absolute right-4 top-1/2 -translate-y-1/2 w-4 h-4 animate-spin opacity-40" />
+              )}
+            </div>
           </div>
-          {autoDetected && (
-            <motion.span
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              className="inline-block mt-2 px-2 py-1 text-[11px] font-bold rounded-full bg-violet-500/10 text-violet-400 border border-violet-500/20"
-            >
-              ✨ Auto
-            </motion.span>
-          )}
+
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label className="text-xs font-bold uppercase tracking-wider mb-2 block opacity-50 ml-1">Amount (₹)</label>
+              <input
+                type="number"
+                value={amount || ''}
+                onChange={(e) => setAmount(parseFloat(e.target.value))}
+                className="w-full rounded-2xl px-5 py-4 focus:outline-none focus:ring-2 focus:ring-violet-500/50 transition-all"
+                style={{ background: 'var(--bg-input)', border: '1px solid var(--border-input)', color: 'var(--text-primary)' }}
+                placeholder="0.00"
+                required
+              />
+            </div>
+            <div>
+              <label className="text-xs font-bold uppercase tracking-wider mb-2 block opacity-50 ml-1">Source</label>
+              <select
+                value={source}
+                onChange={(e) => setSource(e.target.value)}
+                className="w-full rounded-2xl px-5 py-4 focus:outline-none focus:ring-2 focus:ring-violet-500/50 transition-all appearance-none cursor-pointer"
+                style={{ background: 'var(--bg-input)', border: '1px solid var(--border-input)', color: 'var(--text-primary)' }}
+              >
+                {INCOME_SOURCES.map(s => <option key={s} value={s}>{s}</option>)}
+              </select>
+            </div>
+          </div>
+
+          <div>
+            <label className="text-xs font-bold uppercase tracking-wider mb-2 block opacity-50 ml-1">Date</label>
+            <input
+              type="date"
+              value={date}
+              onChange={(e) => setDate(e.target.value)}
+              className="w-full rounded-2xl px-5 py-4 focus:outline-none focus:ring-2 focus:ring-violet-500/50 transition-all"
+              style={{ background: 'var(--bg-input)', border: '1px solid var(--border-input)', color: 'var(--text-primary)' }}
+              required
+            />
+          </div>
         </div>
-      </div>
-      <div>
-        <label className="block text-sm font-medium mb-1.5 ml-1" style={{ color: 'var(--text-secondary)' }}>Date</label>
-        <input
-          type="date"
-          value={date}
-          onChange={(e) => setDate(e.target.value)}
-          required
-          className="w-full rounded-2xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-violet-500/50 focus:border-violet-500 transition-all apple-input"
-          style={{ background: 'var(--bg-input)', border: '1px solid var(--border-input)', color: 'var(--text-primary)' }}
-        />
-      </div>
-      <button
-        type="submit"
-        className="w-full apple-btn-primary"
-      >
-        Add Income
-      </button>
-    </form>
+
+        <button
+          type="submit"
+          className="w-full apple-btn-primary"
+        >
+          <Plus className="w-5 h-5" />
+          Add Income
+        </button>
+      </form>
+    </>
   );
 }

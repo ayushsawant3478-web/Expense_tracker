@@ -72,3 +72,7 @@ if __name__ == "__main__":
     port = int(os.getenv("PORT", "8000"))
     # Listen on 0.0.0.0 to ensure connectivity across all local interfaces
     app.run(debug=True, host="0.0.0.0", port=port)
+
+if __name__ == "__main__":
+    port = int(os.getenv("PORT", "8000"))
+    app.run(debug=False, port=port)

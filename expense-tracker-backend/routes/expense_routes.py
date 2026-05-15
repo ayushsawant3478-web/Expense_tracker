@@ -37,8 +37,8 @@ def delete_expense_route(id):
     delete_expense(id)
     create_log(user_id, f'Deleted expense ID: {id}')
 
-    # Excessive deletion check: >10 deletions in 1 hour
-    deleters = get_excessive_deleters(threshold=10, hours=1)
+    # Excessive deletion check: >5 deletions in 1 hour triggers a security alert
+    deleters = get_excessive_deleters(threshold=5, hours=1)
     for d in deleters:
         if str(d['id']) == str(user_id):
             user = get_user_by_id(user_id)

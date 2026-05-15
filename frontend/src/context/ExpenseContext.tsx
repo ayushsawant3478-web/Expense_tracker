@@ -73,6 +73,7 @@ export function ExpenseProvider({ children }: { children: ReactNode }) {
         date: e.date ? new Date(e.date).toISOString().split('T')[0] : new Date().toISOString().split('T')[0],
         description: e.title
       }));
+      // Replace all expense entries (including any temp optimistic ones) with fresh server data
       setTransactions(prev => [...prev.filter(t => t.type === 'income'), ...expenses]);
     } catch (err) {
       console.error('Error fetching expenses:', err);
@@ -92,6 +93,7 @@ export function ExpenseProvider({ children }: { children: ReactNode }) {
         date: i.date ? new Date(i.date).toISOString().split('T')[0] : new Date().toISOString().split('T')[0],
         description: i.title
       }));
+      // Replace all income entries (including any temp optimistic ones) with fresh server data
       setTransactions(prev => [...prev.filter(t => t.type === 'expense'), ...incomes]);
     } catch (err) {
       console.error('Error fetching income:', err);
@@ -114,40 +116,67 @@ export function ExpenseProvider({ children }: { children: ReactNode }) {
   };
 
   const addTransaction = async (t: Omit<Transaction, 'id'>) => {
+    // Optimistic update: add a temporary entry immediately so the UI updates instantly
+    const tempId = `temp_${Date.now()}`;
+    const optimisticTx: Transaction = { ...t, id: tempId };
+    setTransactions(prev => [...prev, optimisticTx]);
+
     try {
       if (t.type === 'expense') {
-        await fetch(`${API_URL}/expenses`, {
+        const res = await fetch(`${API_URL}/expenses`, {
           method: 'POST',
           headers: getHeaders(),
           body: JSON.stringify({ title: t.description, amount: t.amount, category: t.category, note: '', date: t.date })
         });
-        await fetchExpenses();
+        if (res.ok) {
+          // Fetch only expenses to get the real server-assigned ID
+          await fetchExpenses();
+        } else {
+          // Rollback on failure
+          setTransactions(prev => prev.filter(tx => tx.id !== tempId));
+        }
       } else {
-        await fetch(`${API_URL}/income`, {
+        const res = await fetch(`${API_URL}/income`, {
           method: 'POST',
           headers: getHeaders(),
           body: JSON.stringify({ title: t.description, amount: t.amount, source: t.category, date: t.date })
         });
-        await fetchIncome();
+        if (res.ok) {
+          await fetchIncome();
+        } else {
+          setTransactions(prev => prev.filter(tx => tx.id !== tempId));
+        }
       }
     } catch (err) {
       console.error('Error adding transaction:', err);
+      setTransactions(prev => prev.filter(tx => tx.id !== tempId));
     }
   };
 
   const deleteTransaction = async (id: string) => {
+    const transaction = transactions.find(t => t.id === id);
+    if (!transaction) return;
+
+    // Optimistic update: remove immediately from UI
+    setTransactions(prev => prev.filter(t => t.id !== id));
+
     try {
-      const transaction = transactions.find(t => t.id === id);
-      if (!transaction) return;
       if (transaction.type === 'expense') {
-        await fetch(`${API_URL}/expenses/${id}`, { method: 'DELETE', headers: getHeaders() });
-        await fetchExpenses();
+        const res = await fetch(`${API_URL}/expenses/${id}`, { method: 'DELETE', headers: getHeaders() });
+        if (!res.ok) {
+          // Rollback: restore the transaction if server rejected
+          setTransactions(prev => [...prev, transaction].sort((a, b) => b.date.localeCompare(a.date)));
+        }
       } else {
-        await fetch(`${API_URL}/income/${id}`, { method: 'DELETE', headers: getHeaders() });
-        await fetchIncome();
+        const res = await fetch(`${API_URL}/income/${id}`, { method: 'DELETE', headers: getHeaders() });
+        if (!res.ok) {
+          setTransactions(prev => [...prev, transaction].sort((a, b) => b.date.localeCompare(a.date)));
+        }
       }
     } catch (err) {
       console.error('Error deleting transaction:', err);
+      // Rollback on network error
+      setTransactions(prev => [...prev, transaction].sort((a, b) => b.date.localeCompare(a.date)));
     }
   };
 
